@@ -1,0 +1,48 @@
+export const API_ENDPOINTS = {
+    AUTH: {
+      LOGIN: "platform/auth/login",
+      REFRESH: "platform/auth/refresh",
+      ME: "platform/auth/me",
+      LOGOUT: "platform/auth/logout",
+    },
+    SCHOOLS: {
+      LIST: "platform/schools",
+      CREATE: "platform/schools",
+      DETAIL: (id: string) => `platform/schools/${id}`,
+      UPDATE: (id: string) => `platform/schools/${id}`,
+      DELETE: (id: string) => `platform/schools/${id}`,
+      STATUS: (id: string) => `/platform/schools/${id}/status`,
+    },
+    PRODUCTS: {
+      LIST: "platform/products",
+      CREATE: "platform/products",
+      DETAIL: (id: string) => `platform/products/${id}`,
+      UPDATE: (id: string) => `platform/products/${id}`,
+      DELETE: (id: string) => `platform/products/${id}`,
+      STATUS: (id: string) => `platform/products/${id}/status`,
+    },
+    PLANS: {
+      LIST: "platform/plans",
+      CREATE: "platform/plans",
+      DETAIL: (id: string) => `platform/plans/${id}`,
+      UPDATE: (id: string) => `platform/plans/${id}`,
+      DELETE: (id: string) => `platform/plans/${id}`,
+      STATUS: (id: string) => `platform/plans/${id}/status`,
+    },
+    SUBSCRIPTIONS: {
+      LIST: "/platform/subscriptions",
+      CREATE: "/platform/subscriptions",
+      DETAIL: (id: string) => `/platform/subscriptions/${id}`, 
+      UPDATE: (id: string) => `/platform/subscriptions/${id}`,
+      DELETE: (id: string) => `/platform/subscriptions/${id}`,
+      STATUS: (id: string) => `/platform/subscriptions/${id}/status`,
+    },
+    SCHOOLADMINS: {
+      LIST: "/platform/users/school-admins",
+      CREATE: "/platform/users/school-admin",
+      DETAIL: (userId: string) => `/platform/users/school-admin/${userId}`,
+      UPDATE: (userId: string) => `/platform/users/school-admin/${userId}`,
+      STATUS: (userId: string) => `/platform/users/school-admin/${userId}/status`,
+      DELETE: (userId: string) => `/platform/users/school-admin/${userId}`,
+    },
+  } as const;
