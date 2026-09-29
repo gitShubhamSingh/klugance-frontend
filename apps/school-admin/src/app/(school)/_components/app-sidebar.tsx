@@ -27,6 +27,8 @@ import {
   Settings,
   Users,
   WalletCards,
+  CalendarClock,
+  Landmark
 } from "lucide-react";
 
 import {
@@ -84,9 +86,19 @@ const academicNavigation = [
     href: "/academics/sections",
     icon: Layers3,
   },
+  {
+    title: "Subjects",
+    href: "/academics/subjects",
+    icon: BookOpen,
+  }
 ] as const;
 
 const operationsNavigation = [
+  {
+    title:"Timetable",
+    href:"/academics/timetable",
+    icon: CalendarClock
+  },
   {
     title: "Attendance",
     href: "/attendance",
@@ -181,13 +193,13 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            School
+            Admin Operations
           </SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu>
               {/* Dashboard */}
-              <SidebarMenuItem>
+              <SidebarMenuItem className="py-1">
                 <SidebarMenuButton
                   isActive={isRouteActive(
                     pathname,
@@ -196,6 +208,7 @@ export function AppSidebar() {
                   render={
                     <Link href="/dashboard" />
                   }
+                  
                 >
                   <LayoutDashboard />
 
@@ -206,7 +219,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
 
               {/* Academics */}
-              <SidebarMenuItem>
+              <SidebarMenuItem className="py-1">
                 <SidebarMenuButton
                   type="button"
                   isActive={isAcademicsRoute}
@@ -220,7 +233,7 @@ export function AppSidebar() {
                     );
                   }}
                 >
-                  <BookOpen />
+                  <Landmark />
 
                   <span>
                     Academics
@@ -296,7 +309,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               
               {/* Teachers */}
-              <SidebarMenuItem>
+              <SidebarMenuItem className="py-1">
                 <SidebarMenuButton
                   isActive={isRouteActive(
                     pathname,
@@ -316,7 +329,7 @@ export function AppSidebar() {
 
 
               {/* Students */}
-              <SidebarMenuItem>
+              <SidebarMenuItem className="py-1">
                 <SidebarMenuButton
                   isActive={isRouteActive(
                     pathname,
@@ -349,6 +362,7 @@ export function AppSidebar() {
                   return (
                     <SidebarMenuItem
                       key={item.href}
+                      className="py-1"
                     >
                       <SidebarMenuButton
                         isActive={active}

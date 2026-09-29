@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-export const sectionSchema = z.object({
-  class_id: z
-    .string()
-    .min(1, "Class is required"),
-
+export const sectionFormSchema = z.object({
   name: z
     .string()
     .trim()
@@ -19,4 +15,4 @@ export const sectionSchema = z.object({
 });
 
 export type SectionFormData =
-  z.infer<typeof sectionSchema>;
+  z.infer<typeof sectionFormSchema>;

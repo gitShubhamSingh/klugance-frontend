@@ -1,0 +1,1 @@
+export { HomeworkPage } from "./components/homework-page";

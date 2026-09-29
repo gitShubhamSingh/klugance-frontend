@@ -42,12 +42,10 @@ export function EditClassDialog({
       id: schoolClass.id,
 
       payload: {
+        academic_year_id: values.academic_year_id,
         name: values.name,
         code: values.code,
-        description:
-          values.description || null,
-        display_order:
-          values.display_order,
+        description: values.description || null,
       },
     });
 

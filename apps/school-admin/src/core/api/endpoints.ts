@@ -3,11 +3,9 @@ export const API_ENDPOINTS = {
       LOGIN: "/auth/login",
       ME: "/auth/me",
     },
-  
     DASHBOARD: {
       OVERVIEW: "/school/dashboard",
     },
-  
     ACADEMIC_YEARS: {
         LIST: "/school/academic-years",
         CREATE: "/school/academic-years",
@@ -59,5 +57,55 @@ export const API_ENDPOINTS = {
           `/school/teachers/${id}`,
         DELETE: (id: string) =>
           `/school/teachers/${id}`,
+      },
+      STUDENTS: {
+        LIST: "/school/students",
+      
+        CREATE: "/school/students",
+
+        DETAIL: (id: string) =>
+          `/school/students/${id}`,
+
+        UPDATE: (id: string) =>
+          `/school/students/${id}`,
+      
+        DELETE: (id: string) =>
+          `/school/students/${id}`,
+      },
+      SUBJECTS: {
+        LIST: "/school/subjects",
+      
+        CREATE: "/school/subjects",
+      
+        DETAIL: (subjectId: string) =>
+          `/school/subjects/${subjectId}`,
+      
+        UPDATE: (subjectId: string) =>
+          `/school/subjects/${subjectId}`,
+      
+        DELETE: (subjectId: string) =>
+          `/school/subjects/${subjectId}`,
+      },
+      CLASS_SUBJECTS: {
+        CREATE: "/school/class-subjects",
+      
+        LIST_BY_CLASS: (classId: string) =>
+          `/school/class-subjects/classes/${classId}`,
+      
+        DETAIL: (classSubjectId: string) =>
+          `/school/class-subjects/${classSubjectId}`,
+      
+        UPDATE: (classSubjectId: string) =>
+          `/school/class-subjects/${classSubjectId}`,
+      
+        DELETE: (classSubjectId: string) =>
+          `/school/class-subjects/${classSubjectId}`,
+      },
+      TEACHER_CLASS_ASSIGNMENTS: {
+        CREATE: "/school/teacher-class-assignments",
+        LIST_BY_TEACHER: (teacherId: string) =>
+          `/school/teacher-class-assignments/teachers/${teacherId}`,
+        DELETE: (teacherClassId: string) =>
+          `/school/teacher-class-assignments/${teacherClassId}`,
       },
   } as const;

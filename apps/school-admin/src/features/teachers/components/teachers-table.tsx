@@ -6,6 +6,9 @@ import {
   UserRound,
   UserRoundCheck,
   UserRoundX,
+  UserRoundPlus,
+  ClipboardList
+
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,10 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import type {
-  Teacher,
-  TeacherStatus,
-} from "../types";
+import type { Teacher } from "../types";
 
 type Props = {
   teachers: Teacher[];
@@ -39,53 +39,87 @@ type Props = {
 
   onEdit?: (teacher: Teacher) => void;
 
-  onDeactivate?: (
-    teacher: Teacher,
-  ) => void;
+  onAssign?: (teacher: Teacher) => void;
+
+  onDeactivate?: (teacher: Teacher) => void;
+
 };
 
-function getTeacherName(
-  teacher: Teacher,
-) {
-  return `${teacher.first_name} ${teacher.last_name}`;
+function getTeacherName(teacher: Teacher): string {
+  const name = [
+    teacher.first_name,
+    teacher.middle_name,
+    teacher.last_name,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  return name || "Teacher";
+}
+
+function getTeacherInitials(teacher: Teacher): string {
+  const firstInitial =
+    teacher.first_name?.charAt(0) ?? "";
+
+  const lastInitial =
+    teacher.last_name?.charAt(0) ?? "";
+
+  const initials =
+    `${firstInitial}${lastInitial}`.toUpperCase();
+
+  return initials || "T";
 }
 
 function getStatusLabel(
-  status: TeacherStatus,
-) {
-  switch (status) {
-    case "active":
-      return "Active";
-
-    case "inactive":
-      return "Inactive";
-
-    case "on_leave":
-      return "On Leave";
-  }
+  isActive: boolean,
+): string {
+  return isActive ? "Active" : "Inactive";
 }
 
 function getStatusClassName(
-  status: TeacherStatus,
-) {
-  switch (status) {
-    case "active":
-      return "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-
-    case "inactive":
-      return "bg-muted text-muted-foreground ring-border";
-
-    case "on_leave":
-      return "bg-amber-50 text-amber-700 ring-amber-600/20";
-  }
+  isActive: boolean,
+): string {
+  return isActive
+    ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+    : "bg-muted text-muted-foreground ring-border";
 }
+
+function formatJoiningDate(
+  joiningDate: string | null,
+): string {
+  if (!joiningDate) {
+    return "Not provided";
+  }
+
+  const date = new Date(
+    `${joiningDate}T00:00:00`,
+  );
+
+  if (Number.isNaN(date.getTime())) {
+    return "Not provided";
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(date);
+}
+
 
 export function TeachersTable({
   teachers,
   onView,
   onEdit,
+  onAssign,
   onDeactivate,
 }: Props) {
+
+
   if (teachers.length === 0) {
     return (
       <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border bg-card p-8 text-center">
@@ -120,15 +154,15 @@ export function TeachersTable({
             </TableHead>
 
             <TableHead>
-              Department
+              Qualification
             </TableHead>
 
             <TableHead>
-              Classes
+              Experience
             </TableHead>
 
             <TableHead>
-              Subjects
+              Joining Date
             </TableHead>
 
             <TableHead>
@@ -140,157 +174,222 @@ export function TeachersTable({
         </TableHeader>
 
         <TableBody>
-          {teachers.map((teacher) => (
-            <TableRow
-              key={teacher.id}
-              className="group"
-            >
-              <TableCell>
-                <button
-                  type="button"
-                  className="flex items-center gap-3 text-left"
-                  onClick={() =>
-                    onView?.(teacher)
-                  }
-                >
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted font-medium">
-                    {teacher.first_name
-                      .charAt(0)
-                      .toUpperCase()}
-                    {teacher.last_name
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
+          {teachers.map((teacher) => {
+            const teacherName =
+              getTeacherName(teacher);
 
-                  <div className="min-w-0">
-                    <div className="truncate font-medium">
-                      {getTeacherName(
-                        teacher,
-                      )}
-                    </div>
+            const initials =
+              getTeacherInitials(teacher);
 
-                    <div className="truncate text-xs text-muted-foreground">
-                      {teacher.email}
-                    </div>
-                  </div>
-                </button>
-              </TableCell>
+            const statusLabel =
+              getStatusLabel(
+                teacher.is_active,
+              );
 
-              <TableCell className="font-mono text-sm">
-                {teacher.employee_id}
-              </TableCell>
+            const statusClassName =
+              getStatusClassName(
+                teacher.is_active,
+              );
 
-              <TableCell>
-                <div>
-                  <div className="font-medium">
-                    {
-                      teacher.designation
-                    }
-                  </div>
+            return (
+              <TableRow
+                key={teacher.id}
+                className="group"
+              >
+                {/* =======================================
+                    TEACHER
+                    ======================================= */}
 
-                  {teacher.department && (
-                    <div className="text-xs text-muted-foreground">
-                      {
-                        teacher.department
-                      }
-                    </div>
-                  )}
-                </div>
-              </TableCell>
-
-              <TableCell>
-                {teacher.classes_count}
-              </TableCell>
-
-              <TableCell>
-                {teacher.subjects_count}
-              </TableCell>
-
-              <TableCell>
-                <span
-                  className={[
-                    "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
-                    getStatusClassName(
-                      teacher.status,
-                    ),
-                  ].join(" ")}
-                >
-                  {getStatusLabel(
-                    teacher.status,
-                  )}
-                </span>
-              </TableCell>
-
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        type="button"
-                        aria-label={`Actions for ${getTeacherName(teacher)}`}
-                      />
+                <TableCell>
+                  <button
+                    type="button"
+                    className="flex items-center gap-3 text-left"
+                    onClick={() =>
+                      onView?.(teacher)
                     }
                   >
-                    <MoreHorizontal className="size-4" />
-                  </DropdownMenuTrigger>
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      {initials}
+                    </div>
 
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() =>
-                        onView?.(teacher)
-                      }
-                    >
-                      <UserRound className="size-4" />
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">
+                        {teacherName}
+                      </div>
 
-                      View Profile
-                    </DropdownMenuItem>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {teacher.email ||
+                          teacher.employee_code}
+                      </div>
+                    </div>
+                  </button>
+                </TableCell>
 
-                    <DropdownMenuItem
-                      onClick={() =>
-                        onEdit?.(teacher)
-                      }
-                    >
-                      <Pencil className="size-4" />
+                {/* =======================================
+                    EMPLOYEE CODE
+                    ======================================= */}
 
-                      Edit Teacher
-                    </DropdownMenuItem>
+                <TableCell className="font-mono text-sm">
+                  {teacher.employee_code}
+                </TableCell>
 
-                    <DropdownMenuSeparator />
+                {/* =======================================
+                    QUALIFICATION
+                    ======================================= */}
 
-                    {teacher.status ===
-                    "active" ? (
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() =>
-                          onDeactivate?.(
-                            teacher,
-                          )
-                        }
-                      >
-                        <UserRoundX className="size-4" />
+                <TableCell>
+                  {teacher.qualification ? (
+                    <span className="text-sm">
+                      {teacher.qualification}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      Not provided
+                    </span>
+                  )}
+                </TableCell>
 
-                        Deactivate
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          onDeactivate?.(
-                            teacher,
-                          )
-                        }
-                      >
-                        <UserRoundCheck className="size-4" />
+                {/* =======================================
+                    EXPERIENCE
+                    ======================================= */}
 
-                        Activate
-                      </DropdownMenuItem>
+                <TableCell>
+                  <span className="text-sm">
+                    {teacher.experience_years ?? 0}{" "}
+                    {teacher.experience_years === 1
+                      ? "year"
+                      : "years"}
+                  </span>
+                </TableCell>
+
+                {/* =======================================
+                    JOINING DATE
+                    ======================================= */}
+
+                <TableCell>
+                  <span className="text-sm">
+                    {formatJoiningDate(
+                      teacher.joining_date,
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+                  </span>
+                </TableCell>
+
+                {/* =======================================
+                    STATUS
+                    ======================================= */}
+
+                <TableCell>
+                  <span
+                    className={[
+                      "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
+                      statusClassName,
+                    ].join(" ")}
+                  >
+                    <span
+                      className={[
+                        "mr-1.5 size-1.5 rounded-full",
+                        teacher.is_active
+                          ? "bg-emerald-600"
+                          : "bg-muted-foreground",
+                      ].join(" ")}
+                    />
+
+                    {statusLabel}
+                  </span>
+                </TableCell>
+
+                {/* =======================================
+                    ACTIONS
+                    ======================================= */}
+
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          aria-label={`Actions for ${teacherName}`}
+                        />
+                      }
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                      {/* View */}
+
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onView?.(teacher)
+                        }
+                      >
+                        <UserRound className="size-4" />
+
+                        View 
+                      </DropdownMenuItem>
+
+                      {/* Edit */}
+
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onEdit?.(teacher)
+                        }
+                      >
+                        <Pencil className="size-4" />
+
+                        Edit
+                      </DropdownMenuItem>
+                      
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onAssign?.(teacher)
+                        }
+                      >
+                        <ClipboardList className="size-4" />
+
+                        Assignments
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuSeparator />
+
+                      {/* Activate / Deactivate */}
+
+                      {teacher.is_active ? (
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() =>
+                            onDeactivate?.(
+                              teacher,
+                            )
+                          }
+                        >
+                          <UserRoundX className="size-4" />
+
+                          Deactivate
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            onDeactivate?.(
+                              teacher,
+                            )
+                          }
+                        >
+                          <UserRoundCheck className="size-4" />
+
+                          Activate
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

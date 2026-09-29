@@ -1,14 +1,14 @@
 import { apiClient } from "@/core/api/client";
 import { API_ENDPOINTS } from "@/core/api/endpoints";
 
-import type { AcademicYear } from "../types";
+import type { AcademicYear, AcademicYearsApiResponse } from "../types";
 
 export async function getAcademicYears(): Promise<
-  AcademicYear[]
+  AcademicYear | null
 > {
-  const { data } = await apiClient.get(
+  const response = await apiClient.get<AcademicYearsApiResponse>(
     API_ENDPOINTS.ACADEMIC_YEARS.LIST,
   );
 
-  return data.data;
+  return response.data.data ?? null;
 }
