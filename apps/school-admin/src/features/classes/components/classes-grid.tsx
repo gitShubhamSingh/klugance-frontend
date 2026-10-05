@@ -85,7 +85,6 @@ export function ClassesGrid({
         const sectionsCount =
           schoolClass.sections_count ?? 0;
 
-        
         const studentCount = 
           schoolClass.students_count ?? 0;
 

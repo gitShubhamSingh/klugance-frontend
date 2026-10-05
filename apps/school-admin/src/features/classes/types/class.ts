@@ -13,15 +13,6 @@ export interface SchoolClass {
 
   display_order: number;
 
-  /*
-   * =====================================================
-   * CLASS STATISTICS
-   *
-   * These will be populated later by the backend.
-   * Optional for now so the current API continues working.
-   * =====================================================
-   */
-
   teachers_count?: number;
 
   subjects_count?: number;
@@ -34,15 +25,11 @@ export interface CreateClassPayload {
 
   name: string;
 
-  code: string;
-
   description: string | null;
 }
 
 export interface UpdateClassPayload {
   name: string;
-
-  code: string;
 
   description: string | null;
 }

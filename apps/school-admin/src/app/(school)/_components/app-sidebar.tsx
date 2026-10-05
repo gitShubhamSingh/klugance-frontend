@@ -96,39 +96,39 @@ const academicNavigation = [
 const operationsNavigation = [
   {
     title:"Timetable",
-    href:"/academics/timetable",
+    href:"/timetable",
     icon: CalendarClock
   },
-  {
-    title: "Attendance",
-    href: "/attendance",
-    icon: CalendarCheck,
-  },
-  {
-    title: "Homework",
-    href: "/homework",
-    icon: ClipboardCheck,
-  },
-  {
-    title: "Exams",
-    href: "/exams",
-    icon: FileText,
-  },
-  {
-    title: "Fees",
-    href: "/fees",
-    icon: WalletCards,
-  },
-  {
-    title: "Transport",
-    href: "/transport",
-    icon: Bus,
-  },
-  {
-    title: "Communication",
-    href: "/communication",
-    icon: Megaphone,
-  },
+  // {
+  //   title: "Attendance",
+  //   href: "/attendance",
+  //   icon: CalendarCheck,
+  // },
+  // {
+  //   title: "Homework",
+  //   href: "/homework",
+  //   icon: ClipboardCheck,
+  // },
+  // {
+  //   title: "Exams",
+  //   href: "/exams",
+  //   icon: FileText,
+  // },
+  // {
+  //   title: "Fees",
+  //   href: "/fees",
+  //   icon: WalletCards,
+  // },
+  // {
+  //   title: "Transport",
+  //   href: "/transport",
+  //   icon: Bus,
+  // },
+  // {
+  //   title: "Communication",
+  //   href: "/communication",
+  //   icon: Megaphone,
+  // },
 ] as const;
 
 function isRouteActive(

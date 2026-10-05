@@ -57,7 +57,6 @@ export function SubjectForm({
 
       defaultValues: {
         name: "",
-        code: "",
         description: "",
         is_mandatory: true,
 
@@ -68,7 +67,6 @@ export function SubjectForm({
   useEffect(() => {
     form.reset({
       name: "",
-      code: "",
       description: "",
       is_mandatory: true,
 
@@ -110,35 +108,6 @@ export function SubjectForm({
         )}
       </div>
 
-      {/* ============================================= */}
-      {/* SUBJECT CODE */}
-      {/* ============================================= */}
-
-      <div className="space-y-2">
-        <Label htmlFor="subject-code">
-          Subject Code
-        </Label>
-
-        <Input
-          id="subject-code"
-          placeholder="e.g. MATH-8"
-          disabled={isPending}
-          {...form.register("code")}
-        />
-
-        <p className="text-xs text-muted-foreground">
-          Optional identifier for this subject.
-        </p>
-
-        {form.formState.errors.code && (
-          <p className="text-sm text-destructive">
-            {
-              form.formState.errors.code
-                .message
-            }
-          </p>
-        )}
-      </div>
 
       {/* ============================================= */}
       {/* DESCRIPTION */}

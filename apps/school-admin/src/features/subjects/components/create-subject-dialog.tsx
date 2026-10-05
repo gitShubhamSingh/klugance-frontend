@@ -80,8 +80,8 @@ export function CreateSubjectDialog({
 
         name: values.name,
 
-        code:
-          values.code || undefined,
+        // code:
+        //   values.code || undefined,
 
         description:
           values.description || undefined,

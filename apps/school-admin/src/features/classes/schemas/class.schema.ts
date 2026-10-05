@@ -7,12 +7,6 @@ export const classSchema = z.object({
     .min(1, "Class name is required")
     .max(100),
 
-  code: z
-    .string()
-    .trim()
-    .min(1, "Class code is required")
-    .max(100),
-
   description: z
     .string()
     .trim()

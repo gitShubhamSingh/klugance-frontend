@@ -1,6 +1,8 @@
 export interface Subject {
   id: string;
 
+  class_subject_id?: string;
+
   school_id?: string;
 
   name: string;

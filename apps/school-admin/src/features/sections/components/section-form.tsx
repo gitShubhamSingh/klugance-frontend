@@ -36,7 +36,6 @@ type Props = {
 
 const EMPTY_VALUES: SectionFormData = {
   name: "",
-  code: "",
 };
 
 export function SectionForm({
@@ -50,7 +49,6 @@ export function SectionForm({
 
     defaultValues: {
       name: defaultValues.name ?? "",
-      code: defaultValues.code ?? "",
     },
   });
 
@@ -66,7 +64,7 @@ export function SectionForm({
         {/* SECTION FIELDS */}
         {/* ============================================= */}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-1">
 
           {/* Section Name */}
 
@@ -77,28 +75,6 @@ export function SectionForm({
               <FormItem>
                 <FormLabel>
                   Section Name
-                </FormLabel>
-
-                <Input
-                  placeholder="A"
-                  disabled={isPending}
-                  {...field}
-                />
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Section Code */}
-
-          <FormField
-            control={form.control}
-            name="code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Section Code
                 </FormLabel>
 
                 <Input

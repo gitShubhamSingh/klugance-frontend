@@ -32,7 +32,6 @@ type Props = {
 
 const EMPTY_VALUES: ClassFormData = {
   name: "",
-  code: "",
   description: "",
 };
 
@@ -53,49 +52,26 @@ export function ClassForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-5"
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Class Name
-                </FormLabel>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Class Name
+              </FormLabel>
 
-                <FormControl>
-                  <Input
-                    placeholder="Grade 1"
-                    {...field}
-                  />
-                </FormControl>
+              <FormControl>
+                <Input
+                  placeholder="Grade 1"
+                  {...field}
+                />
+              </FormControl>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Class Code
-                </FormLabel>
-
-                <FormControl>
-                  <Input
-                    placeholder="GRADE_1"
-                    {...field}
-                  />
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

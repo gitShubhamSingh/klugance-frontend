@@ -35,7 +35,6 @@ export function CreateClassDialog({
     await mutation.mutateAsync({
       academic_year_id: academicYearId,
       name: values.name,
-      code: values.code,
       description:
         values.description || null,
     });

@@ -50,11 +50,18 @@ export const API_ENDPOINTS = {
       },
       TEACHERS: {
         LIST: "/school/teachers",
+        
+        BY_CLASS: (classId: string) =>
+          `/school/teachers/classes/${classId}`,
+
         DETAIL: (id: string) =>
           `/school/teachers/${id}`,
+
         CREATE: "/school/teachers",
+
         UPDATE: (id: string) =>
           `/school/teachers/${id}`,
+
         DELETE: (id: string) =>
           `/school/teachers/${id}`,
       },
@@ -85,6 +92,16 @@ export const API_ENDPOINTS = {
       
         DELETE: (subjectId: string) =>
           `/school/subjects/${subjectId}`,
+              
+        TEACHERS_BY_CLASS: (classId: string) =>
+          `/school/teachers/classes/${classId}`,
+
+        TEACHER_ASSIGNMENTS: "/school/teacher-subject-assignments",
+        
+        TEACHER_ASSIGNMENTS_BY_SUBJECT: (
+          subjectId: string,
+        ) =>
+          `/school/teacher-subject-assignments/subjects/${subjectId}`,
       },
       CLASS_SUBJECTS: {
         CREATE: "/school/class-subjects",
@@ -101,6 +118,10 @@ export const API_ENDPOINTS = {
         DELETE: (classSubjectId: string) =>
           `/school/class-subjects/${classSubjectId}`,
       },
+      TEACHER_ASSIGNMENTS:{
+        LIST: "/school/teacher-assignments",
+        CREATE: "/school/teacher-assignments",
+      },
       TEACHER_CLASS_ASSIGNMENTS: {
         CREATE: "/school/teacher-class-assignments",
         LIST_BY_TEACHER: (teacherId: string) =>
@@ -108,4 +129,22 @@ export const API_ENDPOINTS = {
         DELETE: (teacherClassId: string) =>
           `/school/teacher-class-assignments/${teacherClassId}`,
       },
+      PERIODS:{
+        LIST: "/school/periods",
+        CREATE: "/school/periods"
+      },
+      TIMETABLES: {
+        GRID: (classId: string, sectionId: string) =>
+          `/school/timetables/grid/${classId}/${sectionId}`,
+      
+        CLASS_TEACHERS: (classId: string) =>
+          `/school/teachers/classes/${classId}`,
+        
+        CREATE: "/school/timetables",
+        
+        DELETE: (timetableId: string) =>
+          `/school/timetables/${timetableId}`,
+      },
+      
+      
   } as const;

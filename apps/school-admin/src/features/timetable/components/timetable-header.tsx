@@ -27,10 +27,13 @@ import {
 import { useAcademicYears } from "@/features/academic-years/hooks/use-academic-years";
 import { useClasses } from "@/features/classes/hooks/use-classes";
 import { useSections } from "@/features/sections/hooks/use-sections";
+import { CreatePeriodDialog } from "./create-period-dialog";
+
 
 type Props = {
   selectedClassId?: string;
   selectedSectionId?: string;
+  onAcademicYearChange?: (academicYearId: string) => void;
   onClassChange?: (classId: string) => void;
   onSectionChange?: (sectionId: string) => void;
 };
@@ -38,15 +41,22 @@ type Props = {
 export function TimetableHeader({
   selectedClassId: controlledClassId,
   selectedSectionId: controlledSectionId,
+  onAcademicYearChange,
   onClassChange,
   onSectionChange,
 }: Props) {
-
+  
+  const [isCreatePeriodOpen, setIsCreatePeriodOpen] =
+    useState(false);
   const academicYearQuery = useAcademicYears();
 
   const academicYear = academicYearQuery.data;
 
   const academicYearId = academicYear?.id ?? "";
+
+  useEffect(() => {
+    onAcademicYearChange?.(academicYearId);
+  }, [academicYearId, onAcademicYearChange]);
 
   const classesQuery = useClasses(
     academicYearId,
@@ -389,7 +399,7 @@ export function TimetableHeader({
           <Button
             type="button"
             size="sm"
-            // onClick={handleCreatePeriod}
+            onClick={() => setIsCreatePeriodOpen(true)}
           >
             <Plus className="mr-2 size-4" />
             Create Period
@@ -397,6 +407,13 @@ export function TimetableHeader({
         </div>
         </div>
       </div>
+      
+      <CreatePeriodDialog
+        open={isCreatePeriodOpen}
+        onOpenChange={setIsCreatePeriodOpen}
+        classId={selectedClassId}
+        sectionId={selectedSectionId}
+      />
     </div>
   );
 }

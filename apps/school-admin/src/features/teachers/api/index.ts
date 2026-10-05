@@ -7,12 +7,10 @@ export type { TeacherClassAssignment } from "./get-teacher-class-assignments";
 
 export { deleteTeacherClassAssignment } from "./delete-teacher-class-assigment";
 
-
-
 export {
     createTeacherClassAssignment,
   } from "./create-teacher-class-assignments";
   
-  export type {
+export type {
     CreateTeacherClassAssignmentPayload,
   } from "./create-teacher-class-assignments";
