@@ -299,41 +299,6 @@ export function AcademicYearsPage() {
       {/* CURRENT STATUS */}
       {/* ===================================================== */}
 
-      {/* <section className="rounded-2xl border bg-card p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-semibold">
-              Academic Year Status
-            </h2>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              Current operational status of this academic session.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-3">
-            <div
-              className={
-                academicYear.is_current
-                  ? "size-2 rounded-full bg-primary"
-                  : "size-2 rounded-full bg-muted-foreground"
-              }
-            />
-
-            <div>
-              <p className="text-xs text-muted-foreground">
-                Current Status
-              </p>
-
-              <p className="text-sm font-semibold">
-                {academicYear.is_current
-                  ? "Active Academic Year"
-                  : "Inactive Academic Year"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section> */}
     </div>
   );
 }

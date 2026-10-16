@@ -53,6 +53,10 @@ export function SchoolWizard({
           "school.website",
           "school.address",
           "school.description",
+          "academic_year.name",
+          "academic_year.start_date",
+          "academic_year.end_date",
+          "academic_year.is_current",
         ];
         break;
   

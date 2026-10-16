@@ -42,6 +42,12 @@ export function SchoolFormProvider({
           address: "",
           description: "",
         },
+        academic_year: {
+          name: "",
+          start_date: "",
+          end_date: "",
+          is_current: true,
+        },
 
         owner: {
           email: "",

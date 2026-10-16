@@ -78,6 +78,9 @@ export const API_ENDPOINTS = {
       
         DELETE: (id: string) =>
           `/school/students/${id}`,
+
+        ENROLLMENTS: (studentId: string) =>
+          `/school/students/${studentId}/enrollments`,
       },
       SUBJECTS: {
         LIST: "/school/subjects",
@@ -131,7 +134,9 @@ export const API_ENDPOINTS = {
       },
       PERIODS:{
         LIST: "/school/periods",
-        CREATE: "/school/periods"
+        CREATE: "/school/periods",
+        DELETE: (periodId: string) =>
+          `/school/periods/${periodId}`,
       },
       TIMETABLES: {
         GRID: (classId: string, sectionId: string) =>

@@ -8,8 +8,6 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -135,19 +133,17 @@ export function SectionsGrid({
               </div>
   
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="
-                      size-8 transition-all duration-200
-                      hover:bg-muted
-                    "
-                    aria-label={`Actions for section ${section.name}`}
-                  >
-                    <MoreHorizontal className="size-5" />
-                  </Button>
-                </DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                className="
+                  inline-flex size-8 items-center justify-center
+                  rounded-md
+                  transition-all duration-200
+                  hover:bg-muted
+                "
+                aria-label={`Actions for section ${section.name}`}
+              >
+                <MoreHorizontal className="size-5" />
+              </DropdownMenuTrigger>
   
                 <DropdownMenuContent 
                   align="end"

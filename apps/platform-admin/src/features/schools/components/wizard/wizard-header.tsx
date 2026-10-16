@@ -3,9 +3,9 @@
 import { Check } from "lucide-react";
 
 const steps = [
-  "School",
-  "Owner",
-  "Principal",
+  "School Details",
+  "Owner Details",
+  "Principal / School Admin",
 ];
 
 interface Props {

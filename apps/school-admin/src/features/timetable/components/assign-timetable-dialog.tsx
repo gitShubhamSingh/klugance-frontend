@@ -38,6 +38,9 @@ import { useTimetableClassTeachers } from "../hooks/use-class-teachers";
 import { useCreateTeacherAssignment } from "../hooks/use-create-teacher-assignment";
 import { useCreateTimetable } from "../hooks/use-create-timetable";
 
+
+import { getTeacherAssignments } from "../api/get-teacher-assignments";
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -94,56 +97,44 @@ export function AssignTimetableDialog({
 
   async function onSubmit(values: FormValues) {
     try {
-      /*
-       * STEP 1
-       *
-       * Create Teacher -> Class Subject assignment.
-       *
-       * This returns the teacher_assignment_id that
-       * the timetable API requires.
-       */
-      const teacherAssignment =
-        await createTeacherAssignmentMutation.mutateAsync({
-          teacher_id: values.teacherId,
-          class_subject_id: values.classSubjectId,
-          section_id: sectionId,
-          academic_year_id: academicYearId,
-        });
-
-      /*
-       * STEP 2
-       *
-       * Create timetable entry using the assignment
-       * returned from STEP 1.
-       */
+      const assignments = await getTeacherAssignments();
+  
+      const existingAssignment = assignments.find(
+        (assignment) =>
+          assignment.teacher_profile_id === values.teacherId &&
+          assignment.class_subject_id === values.classSubjectId &&
+          assignment.section_id === sectionId &&
+          assignment.academic_year_id === academicYearId,
+      );
+  
+      const teacherAssignmentId =
+        existingAssignment?.id ??
+        (
+          await createTeacherAssignmentMutation.mutateAsync({
+            teacher_id: values.teacherId,
+            class_subject_id: values.classSubjectId,
+            section_id: sectionId,
+            academic_year_id: academicYearId,
+          })
+        ).id;
+  
       await createTimetableMutation.mutateAsync({
         academic_year_id: academicYearId,
         class_id: classId,
         section_id: sectionId,
-        teacher_assignment_id: teacherAssignment.id,
+        teacher_assignment_id: teacherAssignmentId,
         period_id: periodId,
         day_of_week: day,
-        effective_from: new Date()
-          .toISOString()
-          .slice(0, 10),
-        effective_to: new Date()
-          .toISOString()
-          .slice(0, 10),
+        effective_from: new Date().toISOString().slice(0, 10),
+        effective_to: new Date().toISOString().slice(0, 10),
       });
-
+  
       toast.success("Timetable assigned successfully.");
-
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error(
-        "Failed to assign timetable:",
-        error,
-      );
-
-      toast.error(
-        "Failed to assign timetable. Please try again.",
-      );
+      console.error("Failed to assign timetable:", error);
+      toast.error("Failed to assign timetable. Please try again.");
     }
   }
 

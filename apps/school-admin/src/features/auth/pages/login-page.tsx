@@ -1,10 +1,35 @@
 "use client";
 
-import {
-  LoginCard,
-} from "../components/login-card";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+import { useAuthStore } from "@/core/auth/store/auth.store";
+import { LoginCard } from "../components/login-card";
 
 export function LoginPage() {
+  const router = useRouter();
+
+  const isAuthenticated = useAuthStore(
+    (state) => state.isAuthenticated,
+  );
+
+  const user = useAuthStore(
+    (state) => state.user,
+  );
+
+  const shouldRedirect =
+    isAuthenticated && !!user && !!user.school;
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      router.replace("/dashboard");
+    }
+  }, [shouldRedirect, router]);
+
+  if (shouldRedirect) {
+    return null;
+  }
+
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       <section className="hidden bg-slate-950 text-white lg:flex">

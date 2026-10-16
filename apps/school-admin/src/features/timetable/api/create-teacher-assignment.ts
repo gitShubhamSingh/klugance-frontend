@@ -14,6 +14,7 @@ export type TeacherAssignment = {
   teacher_profile_id: string;
   class_subject_id: string;
   academic_year_id: string;
+  section_id: string;
 };
 
 export async function createTeacherAssignment(

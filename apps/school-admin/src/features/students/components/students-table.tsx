@@ -3,6 +3,7 @@
 import {
   MoreHorizontal,
   UserRound,
+  Trash2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+
+import { useDeleteStudent } from "../hooks/use-delete-student";
 import type { Student } from "../types";
 
 type Props = {
@@ -108,6 +111,8 @@ export function StudentsTable({
    * Loading
    * -------------------------------------------------------
    */
+
+  const deleteStudentMutation = useDeleteStudent();
 
   if (isLoading) {
     return (
@@ -338,23 +343,17 @@ export function StudentsTable({
 
                 <TableCell>
                   <DropdownMenu>
-                    <DropdownMenuTrigger
-                      asChild
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8"
+                  <DropdownMenuTrigger
+                    className="size-8 transition-all duration-200 hover:bg-muted"
+                    aria-label={`Actions for ${student.first_name} ${student.last_name}`}
+                  >
+                    <MoreHorizontal className="size-4" />
+                  </DropdownMenuTrigger>
+
+                    <DropdownMenuContent 
+                      align="end"
+                      className="min-w-[170px]"
                       >
-                        <MoreHorizontal className="size-4" />
-
-                        <span className="sr-only">
-                          Student actions
-                        </span>
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={() =>
                           onViewProfile?.(
@@ -374,6 +373,36 @@ export function StudentsTable({
                       >
                         Edit Student
                       </DropdownMenuItem>
+                      
+                    
+<DropdownMenuItem
+  className="flex items-center whitespace-nowrap text-destructive focus:text-destructive"
+  disabled={deleteStudentMutation.isPending}
+  onClick={() => {
+    console.log("Delete clicked:", student.id);
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${name}?`
+    );
+
+    if (!confirmed) {
+      console.log("Delete cancelled");
+      return;
+    }
+
+    console.log("Starting delete mutation");
+    deleteStudentMutation.mutate(student.id);
+  }}
+>
+  <Trash2 className="mr-2 size-4 shrink-0" />
+  <span>
+    {deleteStudentMutation.isPending
+      ? "Deleting..."
+      : "Delete Student"}
+  </span>
+</DropdownMenuItem>
+
+
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

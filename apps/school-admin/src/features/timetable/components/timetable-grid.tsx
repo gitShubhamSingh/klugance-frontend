@@ -7,13 +7,14 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
 
-import {useState} from "react";
 import { Button } from "@/components/ui/button";
 
 import type { TimetableGridData } from "../types/timetable-grid";
 import { AssignTimetableDialog } from "./assign-timetable-dialog";
 import { DeleteTimetableDialog } from "./delete-timetable-dialog";
+import { DeletePeriodDialog } from "./delete-period-dialog";
 
 type Props = {
   data?: TimetableGridData;
@@ -23,44 +24,40 @@ type Props = {
   academicYearId: string;
 };
 
+type AssignmentTarget = {
+  periodId: string;
+  day: string;
+};
+
+type DeleteTarget = {
+  timetableId: string;
+  subjectName?: string;
+  teacherName?: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+} | null;
+
 const DAYS = [
-  {
-    key: "MONDAY" as const,
-    label: "Monday",
-  },
-  {
-    key: "TUESDAY" as const,
-    label: "Tuesday",
-  },
-  {
-    key: "WEDNESDAY" as const,
-    label: "Wednesday",
-  },
-  {
-    key: "THURSDAY" as const,
-    label: "Thursday",
-  },
-  {
-    key: "FRIDAY" as const,
-    label: "Friday",
-  },
-  {
-    key: "SATURDAY" as const,
-    label: "Saturday",
-  },
+  { key: "MONDAY" as const, label: "Monday" },
+  { key: "TUESDAY" as const, label: "Tuesday" },
+  { key: "WEDNESDAY" as const, label: "Wednesday" },
+  { key: "THURSDAY" as const, label: "Thursday" },
+  { key: "FRIDAY" as const, label: "Friday" },
+  { key: "SATURDAY" as const, label: "Saturday" },
 ];
 
 function formatTime(time: string) {
   const [hourString, minute] = time.split(":");
-
   const hour = Number(hourString);
-
   const suffix = hour >= 12 ? "PM" : "AM";
-
-  const formattedHour =
-    hour % 12 === 0 ? 12 : hour % 12;
+  const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
 
   return `${formattedHour}:${minute} ${suffix}`;
+}
+
+function formatDay(day: string) {
+  return day.charAt(0) + day.slice(1).toLowerCase();
 }
 
 export function TimetableGrid({
@@ -68,45 +65,35 @@ export function TimetableGrid({
   isLoading = false,
   classId,
   sectionId,
-  academicYearId
+  academicYearId,
 }: Props) {
+  const [assignmentTarget, setAssignmentTarget] =
+    useState<AssignmentTarget | null>(null);
+
+  const [deleteTarget, setDeleteTarget] =
+    useState<DeleteTarget>(null);
+  
+    const [periodDeleteTarget, setPeriodDeleteTarget] =
+      useState<{ 
+        id: string; 
+        name: string;
+        startTime: string;
+        endTime: string; } | null>(null);
 
   const periods = data
     ? Array.from(
         new Map(
           Object.values(data)
             .flat()
-            .map((entry) => [
-              entry.period_id,
-              entry,
-            ]),
+            .map((entry) => [entry.period_id, entry]),
         ).values(),
       ).sort((a, b) =>
-        a.start_time.localeCompare(
-          b.start_time,
-        ),
+        a.start_time.localeCompare(b.start_time),
       )
     : [];
 
-    const [assignmentTarget, setAssignmentTarget] =
-    useState<{
-      periodId: string;
-      day: string;
-    } | null>(null);
-
-    const [deleteTarget, setDeleteTarget] =
-    useState<{
-      timetableId: string;
-      subjectName?: string;
-      teacherName?: string;
-      day?: string;
-      startTime?: string;
-      endTime?: string;
-    } | null>(null);
-
   return (
     <div className="overflow-hidden border bg-card shadow-xl">
-      {/* Card Header */}
       <div className="border-b px-5 py-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-semibold tracking-tight">
@@ -119,10 +106,8 @@ export function TimetableGrid({
         </div>
       </div>
 
-      {/* Horizontal + Vertical Scroll Area */}
       <div className="max-h-[calc(100vh-360px)] overflow-auto">
         <div className="min-w-[1100px]">
-          {/* Day Header */}
           <div className="sticky top-0 z-20 grid grid-cols-[110px_repeat(6,minmax(150px,1fr))] border-b bg-muted/95 backdrop-blur">
             <div className="border-r px-4 py-4">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -148,7 +133,6 @@ export function TimetableGrid({
             ))}
           </div>
 
-          {/* Loading */}
           {isLoading && (
             <div className="flex min-h-[240px] items-center justify-center">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -158,7 +142,6 @@ export function TimetableGrid({
             </div>
           )}
 
-          {/* Empty */}
           {!isLoading && periods.length === 0 && (
             <div className="flex min-h-[240px] items-center justify-center px-6">
               <div className="text-center">
@@ -171,47 +154,57 @@ export function TimetableGrid({
                 </p>
 
                 <p className="mt-1 text-xs text-muted-foreground">
-                  No periods have been assigned to this
-                  class and section yet.
+                  No periods have been assigned to this class
+                  and section yet.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Period Rows */}
           {!isLoading &&
             periods.map((period) => (
               <div
                 key={period.period_id}
                 className="grid grid-cols-[110px_repeat(6,minmax(150px,1fr))] border-b last:border-b-0"
               >
-                {/* Period */}
-                <div className="flex flex-col justify-center border-r bg-muted/10 px-4 py-4">
-                  <span className="text-sm font-semibold">
-                    {period.period}
-                  </span>
+               
+              <div className="group/period relative flex flex-col justify-center border-r bg-muted/10 px-4 py-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1.5 top-1.5 size-6 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover/period:opacity-100 focus-visible:opacity-100"
+                  aria-label={`Delete ${period.period}`}
+                  title={`Delete ${period.period}`}
+                  onClick={() => {
+                    setPeriodDeleteTarget({
+                      id: period.period_id,
+                      name: period.period,
+                      startTime: period.start_time,
+                      endTime: period.end_time,
+                    });
+                  }}
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
 
-                  <span className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Clock3 className="size-3" />
+                <span className="text-sm font-semibold">
+                  {period.period}
+                </span>
 
-                    {formatTime(
-                      period.start_time,
-                    )}
+                <span className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Clock3 className="size-3" />
+                  {formatTime(period.start_time)}
+                  {" – "}
+                  {formatTime(period.end_time)}
+                </span>
+              </div>
 
-                    {" – "}
 
-                    {formatTime(
-                      period.end_time,
-                    )}
-                  </span>
-                </div>
-
-                {/* Days */}
                 {DAYS.map((day) => {
                   const entry = data?.[day.key]?.find(
                     (item) =>
-                      item.period_id ===
-                      period.period_id,
+                      item.period_id === period.period_id,
                   );
 
                   if (!entry || !entry.subject) {
@@ -226,10 +219,10 @@ export function TimetableGrid({
                             variant="outline"
                             size="icon"
                             className="size-10 rounded-full"
+                            aria-label={`Assign ${period.period} on ${day.label}`}
                             onClick={() =>
                               setAssignmentTarget({
-                                periodId:
-                                  period.period_id,
+                                periodId: period.period_id,
                                 day: day.key,
                               })
                             }
@@ -246,57 +239,46 @@ export function TimetableGrid({
                       key={day.key}
                       className="border-r p-2 last:border-r-0"
                     >
-                      <div className="group relative min-h-[116px] rounded-xl bg-background p-3 transition-all hover:-translate-y-0.5">
-                  
-                        {/* Delete Button */}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="
-                            absolute right-2 top-2
-                            size-7
-                            opacity-0
-                            text-muted-foreground
-                            transition-all
-                            hover:bg-destructive/10
-                            hover:text-destructive
-                            group-hover:opacity-100
-                          "
-                          aria-label={`Delete ${entry.subject ?? "timetable"} entry`}
-                          onClick={() => {
-                            if (!entry.timetable_id) {
-                              return;
-                            }
-                  
-                            setDeleteTarget({
-                              timetableId: entry.timetable_id,
-                              subjectName:
-                                entry.subject ?? undefined,
-                              teacherName:
-                                entry.teacher ?? undefined,
-                              day: day.label,
-                              startTime:
-                                formatTime(entry.start_time),
-                              endTime:
-                                formatTime(entry.end_time),
-                            });
-                          }}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                  
-                        {/* Subject */}
-                        <div className="flex items-start gap-2 pr-7">
+                      <div className="group relative min-h-[116px] rounded-xl bg-background p-3 pr-10 transition-all hover:-translate-y-0.5">
+                        {entry.timetable_id && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1.5 top-1.5 size-7 text-muted-foreground opacity-100 transition-colors hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                            aria-label={`Delete ${entry.subject} timetable entry on ${day.label}`}
+                            title="Delete timetable entry"
+                            onClick={(event) => {
+                              event.stopPropagation();
+
+                              setDeleteTarget({
+                                timetableId: entry.timetable_id!,
+                                subjectName: entry.subject ?? undefined,
+                                teacherName: entry.teacher ?? undefined,
+                                day: formatDay(day.key),
+                                startTime: formatTime(
+                                  entry.start_time,
+                                ),
+                                endTime: formatTime(
+                                  entry.end_time,
+                                ),
+                              });
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
+
+                        <div className="flex items-start gap-2">
                           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                             <BookOpen className="size-4 text-muted-foreground" />
                           </div>
-                  
+
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold">
                               {entry.subject ?? "Not assigned"}
                             </p>
-                  
+
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
                               {formatTime(entry.start_time)}
                               {" – "}
@@ -304,19 +286,16 @@ export function TimetableGrid({
                             </p>
                           </div>
                         </div>
-                  
-                        {/* Teacher */}
+
                         {entry.teacher && (
                           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                             <UserRound className="size-3.5 shrink-0" />
-                  
                             <span className="truncate">
                               {entry.teacher}
                             </span>
                           </div>
                         )}
-                  
-                        {/* Hover indicator */}
+
                         <div className="pointer-events-none absolute inset-x-3 bottom-2 h-px scale-x-0 bg-foreground/10 transition-transform group-hover:scale-x-100" />
                       </div>
                     </div>
@@ -326,7 +305,7 @@ export function TimetableGrid({
             ))}
         </div>
       </div>
-      
+
       {assignmentTarget && (
         <AssignTimetableDialog
           open={Boolean(assignmentTarget)}
@@ -338,29 +317,42 @@ export function TimetableGrid({
           classId={classId}
           sectionId={sectionId}
           academicYearId={academicYearId}
-          periodId={assignmentTarget?.periodId ?? ""}
-          day={assignmentTarget?.day ?? ""}
+          periodId={assignmentTarget.periodId}
+          day={assignmentTarget.day}
         />
       )}
 
-    {deleteTarget && (
-      <DeleteTimetableDialog
-        open={Boolean(deleteTarget)}
+      {deleteTarget && (
+        <DeleteTimetableDialog
+          open={Boolean(deleteTarget)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteTarget(null);
+            }
+          }}
+          timetableId={deleteTarget.timetableId}
+          classId={classId}
+          sectionId={sectionId}
+          subjectName={deleteTarget.subjectName}
+          teacherName={deleteTarget.teacherName}
+          day={deleteTarget.day}
+          startTime={deleteTarget.startTime}
+          endTime={deleteTarget.endTime}
+        />
+      )}
+
+      {periodDeleteTarget && (
+       <DeletePeriodDialog
+        open={Boolean(periodDeleteTarget)}
         onOpenChange={(open) => {
-          if (!open) {
-            setDeleteTarget(null);
-          }
+          if (!open) setPeriodDeleteTarget(null);
         }}
-        timetableId={deleteTarget.timetableId}
-        classId={classId}
-        sectionId={sectionId}
-        subjectName={deleteTarget.subjectName}
-        teacherName={deleteTarget.teacherName}
-        day={deleteTarget.day}
-        startTime={deleteTarget.startTime}
-        endTime={deleteTarget.endTime}
+        periodId={periodDeleteTarget.id}
+        periodName={periodDeleteTarget.name}
+        startTime={periodDeleteTarget.startTime}
+        endTime={periodDeleteTarget.endTime}
       />
-    )}
+      )}
     </div>
   );
 }

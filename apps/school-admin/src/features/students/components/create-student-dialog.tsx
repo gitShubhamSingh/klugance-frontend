@@ -28,9 +28,17 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import { useAcademicYears } from "@/features/academic-years/hooks/use-academic-years";
+import { useClasses } from "@/features/classes/hooks/use-classes";
+import { useSections } from "@/features/sections/hooks/use-sections";
+
 import {
   useCreateStudent,
 } from "../hooks/use-create-student";
+
+import {
+  useCreateStudentEnrollment,
+} from "../hooks/use-create-student-enrollment";
 
 const createStudentSchema = z.object({
   first_name: z
@@ -95,12 +103,35 @@ const createStudentSchema = z.object({
       "O-",
       "AB+",
       "AB-",
+      "N.A",
     ])
     .optional(),
 
   admission_date: z
     .string()
     .optional(),
+
+  class_id: z
+    .string()
+    .min(
+      1,
+      "Class is required",
+    ),
+
+  section_id: z
+    .string()
+    .min(
+      1,
+      "Section is required",
+    ),
+
+  roll_number: z
+    .string()
+    .trim()
+    .min(
+      1,
+      "Roll number is required",
+    ),
 });
 
 type CreateStudentFormValues =
@@ -115,68 +146,156 @@ export function CreateStudentDialog({
   open,
   onOpenChange,
 }: Props) {
-  const createMutation =
+  const createStudentMutation =
     useCreateStudent();
+
+  const createEnrollmentMutation =
+    useCreateStudentEnrollment();
+
+  const academicYearQuery =
+    useAcademicYears();
+
+  const academicYearId =
+    academicYearQuery.data?.id ?? "";
+
+  const classesQuery =
+    useClasses(academicYearId);
+
+  const classes =
+    classesQuery.data ?? [];
+
+  const form =
+    useForm<CreateStudentFormValues>({
+      resolver: zodResolver(
+        createStudentSchema,
+      ),
+
+      defaultValues: {
+        first_name: "",
+        middle_name: "",
+        last_name: "",
+        email: "",
+        mobile_number: "",
+        admission_number: "",
+        date_of_birth: "",
+        gender: undefined,
+        blood_group: undefined,
+        admission_date: "",
+        class_id: "",
+        section_id: "",
+        roll_number: "",
+      },
+    });
+
+  const selectedClassId =
+    form.watch("class_id");
+
+  const sectionsQuery =
+    useSections(
+      selectedClassId || undefined,
+    );
+
+  const sections =
+    sectionsQuery.data ?? [];
 
   const [submitError, setSubmitError] =
     useState<string | null>(null);
 
-  const form = useForm<CreateStudentFormValues>({
-    resolver: zodResolver(
-      createStudentSchema,
-    ),
-
-    defaultValues: {
-      first_name: "",
-      middle_name: "",
-      last_name: "",
-      email: "",
-      mobile_number: "",
-      admission_number: "",
-      date_of_birth: "",
-      gender: undefined,
-      blood_group: undefined,
-      admission_date: "",
-    },
-  });
+  const isPending =
+    createStudentMutation.isPending ||
+    createEnrollmentMutation.isPending;
 
   async function onSubmit(
     values: CreateStudentFormValues,
   ) {
     setSubmitError(null);
 
+    if (!academicYearId) {
+      setSubmitError(
+        "Current academic year is unavailable.",
+      );
+
+      return;
+    }
+
     try {
-      await createMutation.mutateAsync({
-        first_name:
-          values.first_name.trim(),
+      /*
+       * =====================================================
+       * STEP 1
+       * Create student profile
+       * =====================================================
+       */
 
-        middle_name:
-          values.middle_name?.trim() || null,
+      const student =
+        await createStudentMutation.mutateAsync({
+          first_name:
+            values.first_name.trim(),
 
-        last_name:
-          values.last_name.trim(),
+          middle_name:
+            values.middle_name?.trim() ||
+            null,
 
-        email:
-          values.email.trim(),
+          last_name:
+            values.last_name.trim(),
 
-        mobile_number:
-          values.mobile_number.trim(),
+          email:
+            values.email.trim(),
 
-        admission_number:
-          values.admission_number.trim(),
+          mobile_number:
+            values.mobile_number.trim(),
 
-        date_of_birth:
-          values.date_of_birth || null,
+          admission_number:
+            values.admission_number.trim(),
 
-        gender:
-          values.gender ?? null,
+          date_of_birth:
+            values.date_of_birth || null,
 
-        blood_group:
-          values.blood_group ?? null,
+          gender:
+            values.gender ?? null,
 
-        admission_date:
-          values.admission_date || null,
+          blood_group:
+            values.blood_group ?? null,
+
+          admission_date:
+            values.admission_date || null,
+        });
+
+      /*
+       * =====================================================
+       * STEP 2
+       * Create student enrollment
+       * =====================================================
+       */
+
+      await createEnrollmentMutation.mutateAsync({
+        studentId: student.id,
+
+        payload: {
+          academic_year_id:
+            academicYearId,
+
+          class_id:
+            values.class_id,
+
+          section_id:
+            values.section_id,
+
+          roll_number:
+            values.roll_number.trim(),
+
+          enrollment_date:
+            values.admission_date ||
+            new Date()
+              .toISOString()
+              .split("T")[0],
+        },
       });
+
+      /*
+       * =====================================================
+       * SUCCESS
+       * =====================================================
+       */
 
       form.reset();
 
@@ -191,18 +310,42 @@ export function CreateStudentDialog({
   function handleOpenChange(
     nextOpen: boolean,
   ) {
-    if (
-      createMutation.isPending
-    ) {
+    if (isPending) {
       return;
     }
 
     if (!nextOpen) {
       form.reset();
+
       setSubmitError(null);
     }
 
     onOpenChange(nextOpen);
+  }
+
+  function handleClassChange(
+    classId: string,
+  ) {
+    form.setValue(
+      "class_id",
+      classId,
+      {
+        shouldValidate: true,
+      },
+    );
+
+    /*
+     * Section belongs to the selected class.
+     * Therefore changing class must clear
+     * the previously selected section.
+     */
+    form.setValue(
+      "section_id",
+      "",
+      {
+        shouldValidate: true,
+      },
+    );
   }
 
   return (
@@ -217,8 +360,9 @@ export function CreateStudentDialog({
           </DialogTitle>
 
           <DialogDescription>
-            Create a new student profile for
-            your school.
+            Create a new student profile and
+            enroll the student into a class
+            and section.
           </DialogDescription>
         </DialogHeader>
 
@@ -342,6 +486,173 @@ export function CreateStudentDialog({
           </div>
 
           {/* ================================================== */}
+          {/* ACADEMIC INFORMATION */}
+          {/* ================================================== */}
+
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold">
+                Academic Information
+              </h3>
+
+              <p className="text-xs text-muted-foreground">
+                Assign the student to the
+                current academic year,
+                class and section.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* CLASS */}
+
+              <FormField
+                label="Class"
+                required
+                error={
+                  form.formState.errors
+                    .class_id?.message
+                }
+              >
+                <Select
+                  value={
+                    form.watch(
+                      "class_id",
+                    ) ?? ""
+                  }
+                  onValueChange={
+                    handleClassChange
+                  }
+                  disabled={
+                    classesQuery.isLoading ||
+                    isPending
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        classesQuery.isLoading
+                          ? "Loading classes..."
+                          : "Select class"
+                      }
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent
+                    position="popper"
+                    className="z-[100]"
+                  >
+                    {classes.map(
+                      (schoolClass) => (
+                        <SelectItem
+                          key={
+                            schoolClass.id
+                          }
+                          value={
+                            schoolClass.id
+                          }
+                        >
+                          {
+                            schoolClass.name
+                          }
+                        </SelectItem>
+                      ),
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              {/* SECTION */}
+
+              <FormField
+                label="Section"
+                required
+                error={
+                  form.formState.errors
+                    .section_id?.message
+                }
+              >
+                <Select
+                  value={
+                    form.watch(
+                      "section_id",
+                    ) ?? ""
+                  }
+                  onValueChange={(
+                    value,
+                  ) =>
+                    form.setValue(
+                      "section_id",
+                      value,
+                      {
+                        shouldValidate:
+                          true,
+                      },
+                    )
+                  }
+                  disabled={
+                    !selectedClassId ||
+                    sectionsQuery.isLoading ||
+                    isPending
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !selectedClassId
+                          ? "Select class first"
+                          : sectionsQuery.isLoading
+                            ? "Loading sections..."
+                            : "Select section"
+                      }
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent
+                    position="popper"
+                    className="z-[100]"
+                  >
+                    {sections.map(
+                      (section) => (
+                        <SelectItem
+                          key={
+                            section.id
+                          }
+                          value={
+                            section.id
+                          }
+                        >
+                          {
+                            section.name
+                          }
+                        </SelectItem>
+                      ),
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              {/* ROLL NUMBER */}
+
+              <FormField
+                label="Roll Number"
+                required
+                error={
+                  form.formState.errors
+                    .roll_number?.message
+                }
+              >
+                <Input
+                  {...form.register(
+                    "roll_number",
+                  )}
+                  placeholder="001"
+                  disabled={isPending}
+                />
+              </FormField>
+            </div>
+          </div>
+
+          {/* ================================================== */}
           {/* ADMISSION INFORMATION */}
           {/* ================================================== */}
 
@@ -362,7 +673,8 @@ export function CreateStudentDialog({
                 required
                 error={
                   form.formState.errors
-                    .admission_number?.message
+                    .admission_number
+                    ?.message
                 }
               >
                 <Input
@@ -370,6 +682,7 @@ export function CreateStudentDialog({
                     "admission_number",
                   )}
                   placeholder="ADM-001"
+                  disabled={isPending}
                 />
               </FormField>
 
@@ -377,7 +690,8 @@ export function CreateStudentDialog({
                 label="Admission Date"
                 error={
                   form.formState.errors
-                    .admission_date?.message
+                    .admission_date
+                    ?.message
                 }
               >
                 <Input
@@ -385,6 +699,7 @@ export function CreateStudentDialog({
                   {...form.register(
                     "admission_date",
                   )}
+                  disabled={isPending}
                 />
               </FormField>
 
@@ -397,10 +712,13 @@ export function CreateStudentDialog({
               >
                 <Select
                   value={
-                    form.watch("gender") ??
-                    ""
+                    form.watch(
+                      "gender",
+                    ) ?? ""
                   }
-                  onValueChange={(value) => {
+                  onValueChange={(
+                    value,
+                  ) => {
                     form.setValue(
                       "gender",
                       value as
@@ -413,6 +731,7 @@ export function CreateStudentDialog({
                       },
                     );
                   }}
+                  disabled={isPending}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
@@ -421,19 +740,19 @@ export function CreateStudentDialog({
                   <SelectContent
                     position="popper"
                     className="z-[100]"
-                    >
+                  >
                     <SelectItem value="MALE">
-                        Male
+                      Male
                     </SelectItem>
 
                     <SelectItem value="FEMALE">
-                        Female
+                      Female
                     </SelectItem>
 
                     <SelectItem value="OTHER">
-                        Other
+                      Other
                     </SelectItem>
-                 </SelectContent>
+                  </SelectContent>
                 </Select>
               </FormField>
 
@@ -450,10 +769,13 @@ export function CreateStudentDialog({
                       "blood_group",
                     ) ?? ""
                   }
-                  onValueChange={(value) => {
+                  onValueChange={(
+                    value,
+                  ) => {
                     form.setValue(
                       "blood_group",
                       value as
+                        | "N.A"
                         | "A+"
                         | "A-"
                         | "B+"
@@ -468,6 +790,7 @@ export function CreateStudentDialog({
                       },
                     );
                   }}
+                  disabled={isPending}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select blood group" />
@@ -476,39 +799,39 @@ export function CreateStudentDialog({
                   <SelectContent
                     position="popper"
                     className="z-[100]"
-                    >
+                  >
                     <SelectItem value="A+">
-                        A+
+                      A+
                     </SelectItem>
 
                     <SelectItem value="A-">
-                        A-
+                      A-
                     </SelectItem>
 
                     <SelectItem value="B+">
-                        B+
+                      B+
                     </SelectItem>
 
                     <SelectItem value="B-">
-                        B-
+                      B-
                     </SelectItem>
 
                     <SelectItem value="O+">
-                        O+
+                      O+
                     </SelectItem>
 
                     <SelectItem value="O-">
-                        O-
+                      O-
                     </SelectItem>
 
                     <SelectItem value="AB+">
-                        AB+
+                      AB+
                     </SelectItem>
 
                     <SelectItem value="AB-">
-                        AB-
+                      AB-
                     </SelectItem>
-                 </SelectContent>
+                  </SelectContent>
                 </Select>
               </FormField>
             </div>
@@ -534,9 +857,7 @@ export function CreateStudentDialog({
             <Button
               type="button"
               variant="outline"
-              disabled={
-                createMutation.isPending
-              }
+              disabled={isPending}
               onClick={() =>
                 handleOpenChange(false)
               }
@@ -546,11 +867,9 @@ export function CreateStudentDialog({
 
             <Button
               type="submit"
-              disabled={
-                createMutation.isPending
-              }
+              disabled={isPending}
             >
-              {createMutation.isPending
+              {isPending
                 ? "Creating..."
                 : "Create Student"}
             </Button>

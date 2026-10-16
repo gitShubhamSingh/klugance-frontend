@@ -375,152 +375,119 @@ export function AssignTeacherDialog({
             {/* SUCCESS */}
             {/* =========================================== */}
 
-            {!assignmentsQuery.isLoading &&
-              !assignmentsQuery.isError && (
-                <>
-                  {/* ===================================== */}
-                  {/* EMPTY */}
-                  {/* ===================================== */}
+          
+{!assignmentsQuery.isLoading &&
+  !assignmentsQuery.isError && (
+    <div className="space-y-3">
+      {/* Always show the heading and action buttons */}
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium">
+            Assigned Classes
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {assignments.length}{" "}
+            {assignments.length === 1 ? "class" : "classes"} assigned
+          </p>
+        </div>
 
-                  {assignments.length === 0 ? (
-                    <div className="flex min-h-40 flex-col items-center justify-center rounded-xl border p-6 text-center">
-                      <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                        <BookOpen className="size-5 text-muted-foreground" />
-                      </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => {
+              setSelectedClassIds([]);
+              setIsAddClassOpen(true);
+            }}
+            disabled={
+              classesQuery.isLoading ||
+              availableClasses.length === 0
+            }
+          >
+            <Plus className="size-4" />
+            Assign Class
+          </Button>
 
-                      <h3 className="mt-3 text-sm font-semibold">
-                        No class assignments
-                      </h3>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={handleRefresh}
+            disabled={assignmentsQuery.isFetching}
+            aria-label="Refresh assignments"
+          >
+            <RefreshCw
+              className={
+                assignmentsQuery.isFetching
+                  ? "size-4 animate-spin"
+                  : "size-4"
+              }
+            />
+          </Button>
+        </div>
+      </div>
 
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        This teacher has not been
-                        assigned to any class yet.
-                      </p>
-                    </div>
-                  ) : (
-                    /* =================================== */
-                    /* ASSIGNED CLASSES */
-                    /* =================================== */
+      {/* Render either the empty state or assigned classes */}
+      {assignments.length === 0 ? (
+        <div className="flex min-h-40 flex-col items-center justify-center rounded-xl border p-6 text-center">
+          <BookOpen className="size-5 text-muted-foreground" />
 
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                            <p className="text-sm font-medium">
-                            Assigned Classes
-                            </p>
+          <h3 className="mt-3 text-sm font-semibold">
+            No class assignments
+          </h3>
 
-                            <p className="text-xs text-muted-foreground">
-                            {assignments.length}{" "}
-                            {assignments.length === 1
-                                ? "class"
-                                : "classes"}{" "}
-                            assigned
-                            </p>
-                        </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            This teacher has not been assigned to any class yet.
+          </p>
+        </div>
+      ) : (
+       
+<div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+  {assignedClasses.map(({ assignment, schoolClass }) => (
+    <div
+      key={assignment.id}
+      className="flex items-center gap-3 rounded-lg border p-3"
+    >
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+        <BookOpen className="size-4 text-primary" />
+      </div>
 
-                        <div className="flex items-center gap-2">
-                            <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => {
-                                setSelectedClassIds([]);
-                                setIsAddClassOpen(true);
-                            }}
-                            disabled={
-                                classesQuery.isLoading ||
-                                availableClasses.length === 0
-                            }
-                            >
-                            <Plus className="size-4" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">
+          {schoolClass?.name ?? "Unknown Class"}
+        </p>
 
-                            Assign Class
-                            </Button>
+        {schoolClass?.code && (
+          <p className="text-xs text-muted-foreground">
+            {schoolClass.code}
+          </p>
+        )}
+      </div>
 
-                            <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            onClick={handleRefresh}
-                            disabled={
-                                assignmentsQuery.isFetching
-                            }
-                            aria-label="Refresh assignments"
-                            >
-                            <RefreshCw
-                                className={
-                                assignmentsQuery.isFetching
-                                    ? "size-4 animate-spin"
-                                    : "size-4"
-                                }
-                            />
-                            </Button>
-                        </div>
-                        </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8 shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        onClick={() => {
+          setAssignmentToDelete(assignment);
+        }}
+        disabled={deleteAssignmentMutation.isPending}
+        aria-label={`Remove ${
+          schoolClass?.name ?? "class"
+        } assignment`}
+      >
+        <Trash2 className="size-4" />
+      </Button>
+    </div>
+  ))}
+</div>
 
-                      <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                        {assignedClasses.map(
-                          ({
-                            assignment,
-                            schoolClass,
-                          }) => (
-                            <div
-                              key={
-                                assignment.id
-                              }
-                              className="flex items-center gap-3 rounded-lg border p-3"
-                            >
-                              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                                <BookOpen className="size-4 text-primary" />
-                              </div>
+      )}
+    </div>
+  )}
 
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium">
-                                  {schoolClass?.name ??
-                                    "Unknown Class"}
-                                </p>
-
-                                {schoolClass?.code && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {
-                                      schoolClass.code
-                                    }
-                                  </p>
-                                )}
-                              </div>
-
-                              {/* ========================= */}
-                              {/* DELETE BUTTON */}
-                              {/* ========================= */}
-
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="size-8 shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                onClick={() => {
-                                  setAssignmentToDelete(
-                                    assignment,
-                                  );
-                                }}
-                                disabled={
-                                  deleteAssignmentMutation.isPending
-                                }
-                                aria-label={`Remove ${
-                                  schoolClass?.name ??
-                                  "class"
-                                } assignment`}
-                              >
-                                <Trash2 className="size-4" />
-                              </Button>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
 
             {/* =========================================== */}
             {/* CLASS DETAILS LOADING */}
