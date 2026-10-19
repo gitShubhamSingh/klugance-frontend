@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 
 import {
   MoreHorizontal,
@@ -6,7 +7,18 @@ import {
   Trash2
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { 
+  Button 
+} from "@/components/ui/button";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   DropdownMenu,
@@ -114,6 +126,21 @@ export function StudentsTable({
 
   const deleteStudentMutation = useDeleteStudent();
 
+  const [studentToDelete, setStudentToDelete] =
+    useState<Student | null>(null);
+
+  function handleDeleteStudent() {
+    if (!studentToDelete || deleteStudentMutation.isPending) {
+      return;
+    }
+
+    deleteStudentMutation.mutate(studentToDelete.id, {
+      onSuccess: () => {
+        setStudentToDelete(null);
+      },
+    });
+  }
+
   if (isLoading) {
     return (
       <div className="overflow-hidden rounded-xl border bg-card">
@@ -218,6 +245,7 @@ export function StudentsTable({
    */
 
   return (
+    <>
     <div className="overflow-hidden rounded-xl border bg-card">
       <Table>
         <TableHeader>
@@ -375,32 +403,18 @@ export function StudentsTable({
                       </DropdownMenuItem>
                       
                     
-<DropdownMenuItem
-  className="flex items-center whitespace-nowrap text-destructive focus:text-destructive"
-  disabled={deleteStudentMutation.isPending}
-  onClick={() => {
-    console.log("Delete clicked:", student.id);
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${name}?`
-    );
-
-    if (!confirmed) {
-      console.log("Delete cancelled");
-      return;
-    }
-
-    console.log("Starting delete mutation");
-    deleteStudentMutation.mutate(student.id);
-  }}
->
-  <Trash2 className="mr-2 size-4 shrink-0" />
-  <span>
-    {deleteStudentMutation.isPending
-      ? "Deleting..."
-      : "Delete Student"}
-  </span>
-</DropdownMenuItem>
+                    
+                  <DropdownMenuItem
+                    className="flex items-center whitespace-nowrap text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    disabled={deleteStudentMutation.isPending}
+                    onClick={() => {
+                      console.log("Opening delete confirmation for:", student.id);
+                      setStudentToDelete(student);
+                    }}
+                  >
+                    <Trash2 className="mr-2 size-4 shrink-0" />
+                    <span>Delete Student</span>
+                  </DropdownMenuItem> 
 
 
                     </DropdownMenuContent>
@@ -411,6 +425,56 @@ export function StudentsTable({
           })}
         </TableBody>
       </Table>
+
+
+      <Dialog
+        open={studentToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleteStudentMutation.isPending) {
+            setStudentToDelete(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete student?</DialogTitle>
+
+            <DialogDescription>
+              Are you sure you want to delete{" "}
+              <span className="font-medium text-foreground">
+                {studentToDelete
+                  ? getStudentName(studentToDelete)
+                  : "this student"}
+              </span>
+              ? This action will deactivate the student’s account
+              and remove the student from the active list.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={deleteStudentMutation.isPending}
+              onClick={() => setStudentToDelete(null)}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deleteStudentMutation.isPending}
+              onClick={handleDeleteStudent}
+            >
+              {deleteStudentMutation.isPending
+                ? "Deleting..."
+                : "Delete Student"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+    </>
   );
 }

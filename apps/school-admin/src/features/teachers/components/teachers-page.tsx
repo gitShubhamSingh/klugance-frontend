@@ -61,6 +61,8 @@ type StatusFilter =
   | "inactive";
 
 
+  import { DeleteTeacherDialog } from "./delete-teacher-dialog";
+
 export function TeachersPage() {
   /*
    * ---------------------------------------------------------
@@ -133,6 +135,11 @@ export function TeachersPage() {
     profileOpen,
     setProfileOpen,
   ] = useState(false);
+
+  const [
+    selectedDeleteTeacher,
+    setSelectedDeleteTeacher,
+  ] = useState<Teacher | null>(null);
 
 
   /*
@@ -258,6 +265,10 @@ function handleAssign(
 ) {
   setSelectedAssignTeacher(teacher);
   setIsAssignTeacherOpen(true);
+}
+
+function handleDelete(teacher: Teacher) {
+  setSelectedDeleteTeacher(teacher);
 }
 
   /*
@@ -630,9 +641,8 @@ function handleAssign(
                   onView={handleView}
                   onEdit={handleEdit}
                   onAssign={handleAssign}
-                  onDeactivate={
-                    handleDeactivate
-                  }
+                  onDeactivate={handleDeactivate}
+                  onDelete={handleDelete}
                 />
 
           )}
@@ -678,6 +688,16 @@ function handleAssign(
 
         if (!open) {
           setSelectedAssignTeacher(null);
+        }
+      }}
+    />
+    
+    <DeleteTeacherDialog
+      teacher={selectedDeleteTeacher}
+      open={selectedDeleteTeacher !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          setSelectedDeleteTeacher(null);
         }
       }}
     />

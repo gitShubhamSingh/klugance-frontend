@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useState } from "react";
-import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Mail } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   Dialog,
@@ -11,10 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authApi } from "@/core/auth/api/auth.api";
+import { getErrorMessage } from "@/core/api/get-error-message";
 
 type Props = {
   open: boolean;
@@ -30,14 +33,11 @@ export function ForgotPasswordDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleClose() {
-    onOpenChange(false);
+    if (isSubmitting) return;
 
-    // Reset when dialog closes.
-    setTimeout(() => {
-      setEmail("");
-      setSubmitted(false);
-      setIsSubmitting(false);
-    }, 200);
+    onOpenChange(false);
+    setEmail("");
+    setSubmitted(false);
   }
 
   async function handleSubmit(
@@ -45,26 +45,20 @@ export function ForgotPasswordDialog({
   ) {
     event.preventDefault();
 
-    if (!email.trim()) {
-      return;
-    }
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail) return;
 
     setIsSubmitting(true);
 
-    /*
-     * TODO:
-     * Connect this to:
-     *
-     * POST /auth/forgot-password
-     *
-     * For now we simulate a successful request.
-     */
-    await new Promise((resolve) =>
-      setTimeout(resolve, 800),
-    );
-
-    setIsSubmitting(false);
-    setSubmitted(true);
+    try {
+      await authApi.requestPasswordReset(normalizedEmail);
+      setSubmitted(true);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleBack() {
@@ -78,7 +72,7 @@ export function ForgotPasswordDialog({
         if (!value) {
           handleClose();
         } else {
-          onOpenChange(value);
+          onOpenChange(true);
         }
       }}
     >
@@ -90,21 +84,15 @@ export function ForgotPasswordDialog({
                 <Mail className="size-5" />
               </div>
 
-              <DialogTitle>
-                Forgot your password?
-              </DialogTitle>
+              <DialogTitle>Forgot your password?</DialogTitle>
 
               <DialogDescription>
-                Enter the email address associated with
-                your Klugance account and we'll send you
-                a password reset link.
+                Enter your account email address. If an account
+                exists, we'll send you a password reset link.
               </DialogDescription>
             </DialogHeader>
 
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-5"
-            >
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="forgot-password-email">
                   Email address
@@ -115,11 +103,11 @@ export function ForgotPasswordDialog({
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
-                  }
+                  onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
                   required
+                  maxLength={254}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -135,13 +123,16 @@ export function ForgotPasswordDialog({
 
                 <Button
                   type="submit"
-                  disabled={
-                    isSubmitting || !email.trim()
-                  }
+                  disabled={isSubmitting || !email.trim()}
                 >
-                  {isSubmitting
-                    ? "Sending..."
-                    : "Send reset link"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send reset link"
+                  )}
                 </Button>
               </DialogFooter>
             </form>
@@ -153,15 +144,12 @@ export function ForgotPasswordDialog({
                 <CheckCircle2 className="size-5" />
               </div>
 
-              <DialogTitle>
-                Check your email
-              </DialogTitle>
+              <DialogTitle>Check your email</DialogTitle>
 
               <DialogDescription>
-                If an account exists for this email
-                address, we've sent a password reset link.
-                Please check your inbox and follow the
-                instructions.
+                If an account exists for this email address,
+                password reset instructions have been sent.
+                Check your inbox and follow the link.
               </DialogDescription>
             </DialogHeader>
 
@@ -175,11 +163,8 @@ export function ForgotPasswordDialog({
                 Back
               </Button>
 
-              <Button
-                type="button"
-                onClick={handleClose}
-              >
-                OK
+              <Button type="button" onClick={handleClose}>
+                Done
               </Button>
             </DialogFooter>
           </>

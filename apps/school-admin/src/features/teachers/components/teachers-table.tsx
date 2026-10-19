@@ -7,8 +7,8 @@ import {
   UserRoundCheck,
   UserRoundX,
   UserRoundPlus,
-  ClipboardList
-
+  ClipboardList,
+  Trash2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,8 @@ type Props = {
   onAssign?: (teacher: Teacher) => void;
 
   onDeactivate?: (teacher: Teacher) => void;
+
+  onDelete?: (teacher: Teacher) => void;
 
 };
 
@@ -117,6 +119,7 @@ export function TeachersTable({
   onEdit,
   onAssign,
   onDeactivate,
+  onDelete,
 }: Props) {
 
 
@@ -354,13 +357,10 @@ export function TeachersTable({
 
                       <DropdownMenuSeparator />
 
-                      <DropdownMenuSeparator />
-
                       {/* Activate / Deactivate */}
 
                       {teacher.is_active ? (
                         <DropdownMenuItem
-                          variant="destructive"
                           onClick={() =>
                             onDeactivate?.(
                               teacher,
@@ -384,6 +384,15 @@ export function TeachersTable({
                           Activate
                         </DropdownMenuItem>
                       )}
+                      <DropdownMenuSeparator />
+                      
+                      <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => onDelete?.(teacher)}
+                        >
+                          <Trash2 className="size-4" />
+                          Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
