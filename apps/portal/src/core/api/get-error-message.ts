@@ -1,19 +1,26 @@
+
 import axios from "axios";
 
 export function getErrorMessage(
   error: unknown,
+  fallback = "Something went wrong. Please try again.",
 ): string {
   if (axios.isAxiosError(error)) {
-    return (
-      error.response?.data?.message ??
-      error.response?.data?.detail ??
-      error.message
-    );
+    const detail = error.response?.data?.detail;
+    const message = error.response?.data?.message;
+
+    if (typeof detail === "string" && detail.trim()) {
+      return detail;
+    }
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
   }
 
-  if (error instanceof Error) {
+  if (error instanceof Error && error.message.trim()) {
     return error.message;
   }
 
-  return "Something went wrong.";
+  return fallback;
 }

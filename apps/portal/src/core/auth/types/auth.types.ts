@@ -1,7 +1,8 @@
-export interface LoginRequest {
-    username: string;
-    password: string;
-  }
+export type LoginRequest = {
+  username: string;
+  password: string;
+  app: "portal";
+};
   
   export interface LoginResponse {
     access_token: string;

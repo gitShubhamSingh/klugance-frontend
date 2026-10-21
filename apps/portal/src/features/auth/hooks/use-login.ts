@@ -1,9 +1,14 @@
+
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { sessionService } from "@/core/auth/session/session.service";
+import {
+  getPortalRole,
+  PORTAL_DASHBOARDS,
+} from "@/core/auth/utils/portal-role";
 import type { LoginFormData } from "../schemas/login.schema";
 
 export function useLogin() {
@@ -11,21 +16,22 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (payload: LoginFormData) => {
-      console.log("Submitting login:", payload);
-
       return sessionService.login(
         payload.email,
         payload.password,
       );
     },
 
-    onSuccess: () => {
-      console.log("Login successful");
-      router.replace("/dashboard");
-    },
+    onSuccess: (user) => {
+      const role = getPortalRole(user);
 
-    onError: (error) => {
-      console.error("Login failed:", error);
+      if (!role) {
+        sessionService.clear();
+        router.replace("/login");
+        return;
+      }
+
+      router.replace(PORTAL_DASHBOARDS[role]);
     },
   });
 }

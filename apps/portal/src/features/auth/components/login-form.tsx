@@ -51,7 +51,12 @@ import {
   useLogin,
 } from "../hooks/use-login";
 
-export function LoginForm() {
+type LoginFormProps = {
+  onLoginError: (message: string) => void;
+}
+import { getErrorMessage } from "@/core/api/get-error-message";
+
+export function LoginForm( {onLoginError}: LoginFormProps) {
   const [showPassword, setShowPassword] =
     useState(false);
 
@@ -72,10 +77,14 @@ export function LoginForm() {
     },
   });
 
-  const submit = (
-    values: LoginFormData,
-  ) => {
-    login.mutate(values);
+  const submit = async (values: LoginFormData) => {
+    try {
+      await login.mutateAsync(values);
+    } catch (error) {
+      onLoginError(
+        getErrorMessage(error, "Unable to sign in. Please try again."),
+      );
+    }
   };
 
   return (

@@ -1,5 +1,7 @@
+
 import { redirect } from "next/navigation";
 
 export default function Page() {
-  redirect("/dashboard");
+  // Temporary default until role-aware authentication is implemented.
+  redirect("/teacher/dashboard");
 }

@@ -75,7 +75,11 @@ export function LoginForm() {
   const submit = (
     values: LoginFormData,
   ) => {
-    login.mutate(values);
+    login.mutate(
+      {
+        ...values,
+        app: "school",
+      });
   };
 
   return (

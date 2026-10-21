@@ -1,22 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-import {
-  BookOpen,
-  Bus,
-  CalendarCheck,
-  CalendarDays,
-  ClipboardCheck,
-  FileText,
-  GraduationCap,
-  LayoutDashboard,
-  Megaphone,
-  Settings,
-  Users,
-  WalletCards,
-} from "lucide-react";
+import { GraduationCap, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -30,121 +17,47 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { portalConfig, type PortalRole } from "./roles/portal-config";
 
-const navigation = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "My Students",
-    href: "/students",
-    icon: Users,
-  },
-  {
-    title: "Attendance",
-    href: "/attendance",
-    icon: CalendarCheck,
-  },
-  {
-    title: "Homework",
-    href: "/homework",
-    icon: BookOpen,
-  },
-  {
-    title: "Exams",
-    href: "/exams",
-    icon: FileText,
-  },
-  {
-    title: "Timetable",
-    href: "/timetable",
-    icon: CalendarDays,
-  },
-  {
-    title: "Communication",
-    href: "/communication",
-    icon: Megaphone,
-  },
-  {
-    title: "Fees",
-    href: "/fees",
-    icon: WalletCards,
-  },
-  {
-    title: "Transport",
-    href: "/transport",
-    icon: Bus,
-  },
-] as const;
+type Props = {
+  role: PortalRole;
+};
 
-function isRouteActive(
-  pathname: string,
-  href: string,
-) {
-  if (href === "/dashboard") {
-    return pathname === "/dashboard";
-  }
-
-  return (
-    pathname === href ||
-    pathname.startsWith(`${href}/`)
-  );
-}
-
-export function PortalSidebar() {
+export function PortalSidebar({ role }: Props) {
   const pathname = usePathname();
+  const config = portalConfig[role];
+
+  function isActive(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <Link
-          href="/dashboard"
-          className="flex min-w-0 items-center gap-3"
-        >
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Link href={config.dashboard} className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <GraduationCap className="size-5" />
           </div>
-
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">
-              klugance
-            </div>
-
-            <div className="truncate text-xs text-muted-foreground">
-              Teacher Portal
-            </div>
+          <div>
+            <div className="text-sm font-semibold">klugance</div>
+            <div className="text-xs text-muted-foreground">{config.label}</div>
           </div>
         </Link>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>
-            Portal
-          </SidebarGroupLabel>
-
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map((item) => {
+              {config.navigation.map((item) => {
                 const Icon = item.icon;
 
-                const active = isRouteActive(
-                  pathname,
-                  item.href,
-                );
-
                 return (
-                  <SidebarMenuItem
-                    key={item.href}
-                    className="py-1"
-                  >
+                  <SidebarMenuItem key={item.href} className="py-1">
                     <SidebarMenuButton
-                      isActive={active}
-                      render={
-                        <Link href={item.href} />
-                      }
+                      isActive={isActive(item.href)}
+                      render={<Link href={item.href} />}
                     >
                       <Icon />
                       <span>{item.title}</span>
@@ -161,13 +74,8 @@ export function PortalSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              isActive={isRouteActive(
-                pathname,
-                "/settings",
-              )}
-              render={
-                <Link href="/settings" />
-              }
+              isActive={isActive(`/${role}/settings`)}
+              render={<Link href={`/${role}/settings`} />}
             >
               <Settings />
               <span>Settings</span>

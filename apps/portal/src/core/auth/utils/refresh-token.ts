@@ -1,5 +1,5 @@
 const REFRESH_TOKEN_KEY =
-  "school_admin_refresh_token";
+  "klugance_portal_refresh_token";
 
 export const refreshToken = {
   get(): string | null {

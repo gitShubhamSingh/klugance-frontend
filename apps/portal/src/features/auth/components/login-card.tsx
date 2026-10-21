@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,13 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { ApiErrorDialog } from "@/components/shared/api-error-dialog";
 import { LoginForm } from "./login-form";
-
-import {ForgotPasswordDialog} from "./forget-password-dialog"
+import { ForgotPasswordDialog } from "./forget-password-dialog";
 
 export function LoginCard() {
-  const [forgotPasswordOpen, setForgotPasswordOpen] =
-    useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   return (
     <>
@@ -32,14 +33,12 @@ export function LoginCard() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <LoginForm />
+          <LoginForm onLoginError={setApiError} />
 
           <div className="text-right">
             <button
               type="button"
-              onClick={() =>
-                setForgotPasswordOpen(true)
-              }
+              onClick={() => setForgotPasswordOpen(true)}
               className="text-sm text-primary hover:underline"
             >
               Forgot password?
@@ -51,6 +50,13 @@ export function LoginCard() {
       <ForgotPasswordDialog
         open={forgotPasswordOpen}
         onOpenChange={setForgotPasswordOpen}
+      />
+
+      <ApiErrorDialog
+        open={Boolean(apiError)}
+        title="Login failed"
+        message={apiError}
+        onClose={() => setApiError("")}
       />
     </>
   );

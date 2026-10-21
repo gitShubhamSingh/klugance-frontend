@@ -6,7 +6,7 @@ export default function SettingsPage() {
     <PageContainer>
       <PageHeader
         title="Settings"
-        description="Manage your portal preferences and account settings."
+        description="Manage your account preferences."
       />
     </PageContainer>
   );

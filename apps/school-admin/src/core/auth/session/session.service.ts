@@ -20,6 +20,7 @@ export const sessionService = {
       const response = await authApi.login({
         username,
         password,
+        app: "school",
       });
 
       accessToken.set(response.access_token);

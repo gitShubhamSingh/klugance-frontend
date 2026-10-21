@@ -1,5 +1,5 @@
 const ACCESS_TOKEN_KEY =
-  "school_admin_access_token";
+  "klugance_portal_access_token";
 
 export const accessToken = {
   get(): string | null {

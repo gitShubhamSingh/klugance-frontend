@@ -34,6 +34,7 @@ export function useLogin() {
       sessionService.login(
         payload.email,
         payload.password,
+        "school",
       ),
 
     onSuccess: () => {

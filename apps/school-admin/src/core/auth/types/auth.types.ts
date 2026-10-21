@@ -1,6 +1,7 @@
 export interface LoginRequest {
     username: string;
     password: string;
+    app: "console" | "school" | "teacher" | "parent" | "student";
   }
   
   export interface LoginResponse {
