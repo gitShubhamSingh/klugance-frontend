@@ -4,7 +4,9 @@ import { useState } from "react";
 import {
   MoreHorizontal,
   UserRound,
-  Trash2
+  Trash2,
+  Eye,
+  UsersRound,
 } from "lucide-react";
 
 import { 
@@ -24,6 +26,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -50,6 +53,10 @@ type Props = {
   ) => void;
 
   onEditStudent?: (
+    student: Student,
+  ) => void;
+
+  onManageGuardians?: (
     student: Student,
   ) => void;
 };
@@ -117,6 +124,7 @@ export function StudentsTable({
   isLoading = false,
   onViewProfile,
   onEditStudent,
+  onManageGuardians,
 }: Props) {
   /*
    * -------------------------------------------------------
@@ -389,20 +397,22 @@ export function StudentsTable({
                           )
                         }
                       >
-                        View Profile
+                        <Eye className="mr-2 size-4 shrink-0" />
+                        <span>View/Edit Profile</span>
                       </DropdownMenuItem>
 
                       <DropdownMenuItem
                         onClick={() =>
-                          onEditStudent?.(
+                          onManageGuardians?.(
                             student,
                           )
                         }
                       >
-                        Edit Student
+                        <UsersRound className="mr-2 size-4 shrink-0" />
+                        <span>Guardians</span>
                       </DropdownMenuItem>
-                      
-                    
+
+                      <DropdownMenuSeparator />
                     
                   <DropdownMenuItem
                     className="flex items-center whitespace-nowrap text-destructive focus:bg-destructive/10 focus:text-destructive"

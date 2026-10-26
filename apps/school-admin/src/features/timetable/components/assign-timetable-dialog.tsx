@@ -1,5 +1,6 @@
 "use client";
 
+import { getErrorMessage } from "@/core/api/get-error-message";
 import { useEffect } from "react";
 
 import { useForm } from "react-hook-form";
@@ -133,8 +134,14 @@ export function AssignTimetableDialog({
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error("Failed to assign timetable:", error);
-      toast.error("Failed to assign timetable. Please try again.");
+      // Show the server's reason, e.g. the teacher is already
+      // teaching another class at that time.
+      const message = getErrorMessage(error);
+      toast.error(
+        typeof message === "string" && message
+          ? message
+          : "Failed to assign timetable. Please try again.",
+      );
     }
   }
 

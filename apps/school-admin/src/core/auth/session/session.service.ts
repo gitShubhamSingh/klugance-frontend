@@ -3,7 +3,7 @@ import { queryClient } from "@/core/query/query-client";
 
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../store/auth.store";
-import { accessToken, refreshToken } from "../utils";
+import { accessToken, refreshToken, sessionHint } from "../utils";
 
 export const sessionService = {
   async login(username: string, password: string) {
@@ -39,6 +39,9 @@ export const sessionService = {
         );
       }
 
+      // Mark the browser as signed in only once the session is fully valid
+      // (before the store update so redirects never race the cookie).
+      sessionHint.set();
       useAuthStore.getState().setUser(user);
 
       return user;
@@ -67,6 +70,7 @@ export const sessionService = {
         return null;
       }
 
+      sessionHint.set();
       useAuthStore.getState().setUser(user);
 
       return user;
@@ -76,9 +80,11 @@ export const sessionService = {
     }
   },
 
+  /** Removes tokens, the session hint cookie and in-memory auth state. */
   clear() {
     accessToken.remove();
     refreshToken.remove();
+    sessionHint.remove();
 
     useAuthStore.getState().logout();
   },

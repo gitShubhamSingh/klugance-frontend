@@ -4,3 +4,4 @@ export * from "./types/auth.types";
 export * from "./session/session.service";
 export * from "./auth-provider";
 export * from "./components/protected-route";
+export * from "./components/guest-route";

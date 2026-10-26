@@ -1,4 +1,4 @@
-import { HomeworkPage } from "@/features/homework/components/homework-page";
+import { HomeworkPage } from "@/features/homework";
 
 export default function Page() {
   return <HomeworkPage />;

@@ -1,56 +1,32 @@
 "use client";
 
-import {
-  useEffect,
-} from "react";
+import { useEffect, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-import {
-  useRouter,
-} from "next/navigation";
-
-import {
-  useAuthStore,
-} from "../store/auth.store";
+import { useAuthStore } from "../store/auth.store";
+import { buildLoginPath } from "../utils/auth-routes";
 
 type Props = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export function ProtectedRoute({
-  children,
-}: Props) {
+export function ProtectedRoute({ children }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
 
-  const isAuthenticated =
-    useAuthStore(
-      (state) =>
-        state.isAuthenticated,
-    );
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
 
-  const user =
-    useAuthStore(
-      (state) => state.user,
-    );
+  const signedIn = isAuthenticated && Boolean(user?.school);
 
   useEffect(() => {
-    if (
-      !isAuthenticated ||
-      !user ||
-      !user.school
-    ) {
-      router.replace("/login");
+    if (!signedIn) {
+      // Remember where the admin was going so login can bring them back.
+      router.replace(buildLoginPath(`${pathname}${window.location.search}`));
     }
-  }, [
-    isAuthenticated,
-    user,
-    router,
-  ]);
+  }, [signedIn, pathname, router]);
 
-  if (
-    !isAuthenticated ||
-    !user ||
-    !user.school
-  ) {
+  if (!signedIn) {
     return null;
   }
 

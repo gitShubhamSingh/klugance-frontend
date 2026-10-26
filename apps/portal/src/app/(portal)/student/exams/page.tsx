@@ -1,13 +1,5 @@
-import { PageContainer } from "@/components/layout/page-container";
-import { PageHeader } from "@/components/common/page-header";
+import { StudentExamsPage } from "@/features/student";
 
-export default function StudentExamsPage() {
-  return (
-    <PageContainer>
-      <PageHeader
-        title="Exams & Results"
-        description="View upcoming exams and published results."
-      />
-    </PageContainer>
-  );
+export default function StudentExamsRoute() {
+  return <StudentExamsPage />;
 }

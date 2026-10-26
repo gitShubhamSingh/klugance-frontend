@@ -2,6 +2,9 @@ const ACCESS_TOKEN_KEY =
   "school_admin_access_token";
 
 export const accessToken = {
+  /** localStorage key (used to sync sessions across tabs). */
+  key: ACCESS_TOKEN_KEY,
+
   get(): string | null {
     if (typeof window === "undefined") {
       return null;

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -68,6 +69,13 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
+
+  // closeOnRouteChange: on mobile the sidebar is a drawer — close it after
+  // navigating (link tap, back/forward) so the new page is visible.
+  const pathname = usePathname()
+  React.useEffect(() => {
+    setOpenMobile(false)
+  }, [pathname])
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -187,6 +195,14 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
+          onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+            const link = (event.target as HTMLElement).closest("a[href]")
+            const opensNewTab =
+              event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
+            if (link && !opensNewTab) {
+              setOpenMobile(false)
+            }
+          }}
           className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={
             {

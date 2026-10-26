@@ -1,10 +1,10 @@
-
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { sessionService } from "@/core/auth/session/session.service";
+import { getNextFromLocation, getSafeRedirect } from "@/core/auth/utils/auth-routes";
 import {
   getPortalRole,
   PORTAL_DASHBOARDS,
@@ -31,7 +31,10 @@ export function useLogin() {
         return;
       }
 
-      router.replace(PORTAL_DASHBOARDS[role]);
+      // Go back to the page the user originally asked for, if it's safe.
+      router.replace(
+        getSafeRedirect(getNextFromLocation(), PORTAL_DASHBOARDS[role]),
+      );
     },
   });
 }

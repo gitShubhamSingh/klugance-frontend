@@ -99,16 +99,16 @@ const operationsNavigation = [
     href:"/timetable",
     icon: CalendarClock
   },
-  // {
-  //   title: "Attendance",
-  //   href: "/attendance",
-  //   icon: CalendarCheck,
-  // },
-  // {
-  //   title: "Homework",
-  //   href: "/homework",
-  //   icon: ClipboardCheck,
-  // },
+  {
+    title: "Attendance",
+    href: "/attendance",
+    icon: CalendarCheck,
+  },
+  {
+    title: "Homework",
+    href: "/homework",
+    icon: ClipboardCheck,
+  },
   // {
   //   title: "Exams",
   //   href: "/exams",
@@ -124,11 +124,11 @@ const operationsNavigation = [
   //   href: "/transport",
   //   icon: Bus,
   // },
-  // {
-  //   title: "Communication",
-  //   href: "/communication",
-  //   icon: Megaphone,
-  // },
+  {
+    title: "Communication",
+    href: "/communication",
+    icon: Megaphone,
+  },
 ] as const;
 
 function isRouteActive(

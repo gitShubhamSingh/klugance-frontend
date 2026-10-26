@@ -170,6 +170,12 @@ export function TimetableHeader({
     );
 
 
+  // Periods belong to a class *and* a section: both must be chosen.
+  const canCreatePeriod =
+    Boolean(selectedClassId) &&
+    !sectionsQuery.isLoading &&
+    Boolean(selectedSection);
+
   function handleClassChange(
     classId: string,
   ) {
@@ -362,7 +368,9 @@ export function TimetableHeader({
                         ? "Select class first"
                         : sectionsQuery.isLoading
                           ? "Loading..."
-                          : "Select section"
+                          : sections.length === 0
+                            ? "No sections in this class"
+                            : "Select section"
                     }
                   >
                     {selectedSection?.name}
@@ -399,6 +407,14 @@ export function TimetableHeader({
           <Button
             type="button"
             size="sm"
+            disabled={!canCreatePeriod}
+            title={
+              canCreatePeriod
+                ? undefined
+                : !selectedClassId
+                  ? "Select a class first"
+                  : "Add a section to this class before creating periods"
+            }
             onClick={() => setIsCreatePeriodOpen(true)}
           >
             <Plus className="mr-2 size-4" />
@@ -409,7 +425,7 @@ export function TimetableHeader({
       </div>
       
       <CreatePeriodDialog
-        open={isCreatePeriodOpen}
+        open={isCreatePeriodOpen && canCreatePeriod}
         onOpenChange={setIsCreatePeriodOpen}
         classId={selectedClassId}
         sectionId={selectedSectionId}

@@ -17,6 +17,11 @@ import {
 } from "@/core/auth/session/session.service";
 
 import {
+  getNextFromLocation,
+  getSafeRedirect,
+} from "@/core/auth/utils/auth-routes";
+
+import {
   getErrorMessage,
 } from "@/core/api/get-error-message";
 
@@ -34,12 +39,12 @@ export function useLogin() {
       sessionService.login(
         payload.email,
         payload.password,
-        "school",
       ),
 
     onSuccess: () => {
+      // Go back to the page the admin originally asked for, if it's safe.
       router.replace(
-        "/dashboard",
+        getSafeRedirect(getNextFromLocation()),
       );
     },
 

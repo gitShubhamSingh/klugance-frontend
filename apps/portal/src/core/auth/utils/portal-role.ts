@@ -3,9 +3,10 @@ import type { CurrentUser } from "../types/auth.types";
 export type PortalRole = "TEACHER" | "PARENT" | "STUDENT";
 
 export const PORTAL_DASHBOARDS: Record<PortalRole, string> = {
-  TEACHER: "/teacher/dashboard",
-  PARENT: "/parent/dashboard",
-  STUDENT: "/student/dashboard",
+  // Every portal role shares one dashboard route; the page adapts per role.
+  TEACHER: "/dashboard",
+  PARENT: "/dashboard",
+  STUDENT: "/dashboard",
 };
 
 const PORTAL_ROLES = new Set<string>([

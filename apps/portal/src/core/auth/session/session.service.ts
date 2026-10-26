@@ -1,22 +1,29 @@
+import { queryClient } from "@/core/query/query-client";
+
 import { authApi } from "../api/auth.api";
 import { useAuthStore } from "../store/auth.store";
-import { accessToken, refreshToken } from "../utils";
+import { accessToken, refreshToken, sessionHint } from "../utils";
 import { getPortalRole } from "../utils/portal-role";
 
 export const sessionService = {
   async login(username: string, password: string) {
-    const response = await authApi.login({
-      username,
-      password,
-      app: "portal",
-    });
-
-    accessToken.set(response.access_token);
-    refreshToken.set(response.refresh_token);
-
-    useAuthStore.getState().setAccessToken(response.access_token);
+    // Drop data and tokens that belong to any previous session first.
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    this.clear();
 
     try {
+      const response = await authApi.login({
+        username,
+        password,
+        app: "portal",
+      });
+
+      accessToken.set(response.access_token);
+      refreshToken.set(response.refresh_token);
+
+      useAuthStore.getState().setAccessToken(response.access_token);
+
       const user = await authApi.me();
 
       if (!user.school) {
@@ -29,6 +36,9 @@ export const sessionService = {
         );
       }
 
+      // Only mark the browser as signed in once the session is fully valid
+      // (set before the store update so redirects never race the cookie).
+      sessionHint.set();
       useAuthStore.getState().setUser(user);
 
       return user;
@@ -56,6 +66,7 @@ export const sessionService = {
         return null;
       }
 
+      sessionHint.set();
       useAuthStore.getState().setUser(user);
 
       return user;
@@ -65,13 +76,17 @@ export const sessionService = {
     }
   },
 
+  /** Removes tokens, the session hint cookie and in-memory auth state. */
   clear() {
     accessToken.remove();
     refreshToken.remove();
+    sessionHint.remove();
     useAuthStore.getState().logout();
   },
 
   logout() {
+    void queryClient.cancelQueries();
+    queryClient.clear();
     this.clear();
   },
 };

@@ -1,113 +1,92 @@
 "use client";
 
-import type { AttendanceStudent } from "../types";
-
 import { cn } from "@/lib/utils";
 
-type Props = {
-  student: AttendanceStudent;
-};
-
-function getStudentName(student: AttendanceStudent) {
-  return [
-    student.first_name,
-    student.middle_name,
-    student.last_name,
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
+import {
+  dayStatusLabels,
+  dayStatusStyle,
+  periodStatusDot,
+  periodStatusLabels,
+  studentName,
+} from "../lib/attendance-utils";
+import type { AttendanceStudent } from "../types/attendance";
 
 export function AttendanceStudentCard({
   student,
-}: Props) {
-  const statusLabel =
-    student.status === "present"
-      ? "Present"
-      : student.status === "absent"
-        ? "Absent"
-        : "Not Marked";
+  periodNames,
+}: {
+  student: AttendanceStudent;
+  periodNames: Map<number, string>;
+}) {
+  const style = dayStatusStyle(student.day_status);
+  const name = studentName(student);
 
   return (
     <div
+      tabIndex={0}
       className={cn(
-        "group relative flex min-h-28 cursor-default flex-col items-center justify-center rounded-xl border p-3 transition-all",
-        "hover:-translate-y-0.5 hover:shadow-md",
-
-        student.status === "present" &&
-          "border-green-200 bg-green-50/70 hover:border-green-300",
-
-        student.status === "absent" &&
-          "border-red-200 bg-red-50/70 hover:border-red-300",
-
-        student.status === "not_marked" &&
-          "border-border bg-muted/30 hover:border-border",
+        "group relative flex min-h-36 flex-col items-center justify-center rounded-xl border px-3 pt-7 pb-3 outline-none transition-all",
+        "hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
+        style.card,
       )}
     >
-      <div className="absolute left-3 top-3 text-xs font-semibold tabular-nums text-muted-foreground">
-        {String(student.roll_number).padStart(2, "0")}
+      <div className="absolute top-3 left-3 text-xs font-semibold text-muted-foreground tabular-nums">
+        {student.roll_number.padStart(2, "0")}
       </div>
 
-      <div
-        className={cn(
-          "flex size-11 items-center justify-center rounded-full text-sm font-semibold",
-
-          student.status === "present" &&
-            "bg-green-100 text-green-700",
-
-          student.status === "absent" &&
-            "bg-red-100 text-red-700",
-
-          student.status === "not_marked" &&
-            "bg-muted text-muted-foreground",
-        )}
-      >
+      <div className={cn("flex size-11 items-center justify-center rounded-full text-sm font-semibold", style.avatar)}>
         {student.first_name.charAt(0).toUpperCase()}
         {student.last_name.charAt(0).toUpperCase()}
       </div>
 
-      <p className="mt-2 max-w-full truncate text-center text-sm font-medium">
-        {getStudentName(student)}
-      </p>
-
+      <p className="mt-2 max-w-full truncate text-center text-sm font-medium">{name}</p>
       <p className="mt-0.5 text-[11px] text-muted-foreground">
-        {statusLabel}
+        {student.day_status ? dayStatusLabels[student.day_status] : "Not marked"}
       </p>
 
-      <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-56 -translate-x-1/2 rounded-lg border bg-popover p-3 text-popover-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-        <p className="font-semibold">
-          {getStudentName(student)}
-        </p>
+      {/* One dot per marked period, in order. */}
+      {student.marks.length > 0 && (
+        <div className="mt-1.5 flex gap-1" aria-hidden>
+          {student.marks.map((mark) => (
+            <span key={mark.period_number} className={cn("size-1.5 rounded-full", periodStatusDot[mark.status])} />
+          ))}
+        </div>
+      )}
 
+      <div
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-60 -translate-x-1/2 rounded-lg border bg-popover p-3 text-popover-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+      >
+        <p className="font-semibold">{name}</p>
         <div className="mt-2 space-y-1 text-xs text-muted-foreground">
           <p>
-            Roll Number:{" "}
-            <span className="font-medium text-foreground">
-              {student.roll_number}
-            </span>
+            Roll number: <span className="font-medium text-foreground">{student.roll_number}</span>
           </p>
-
           <p>
-            Admission No:{" "}
-            <span className="font-medium text-foreground">
-              {student.admission_number}
-            </span>
+            Admission no: <span className="font-medium text-foreground">{student.admission_number}</span>
           </p>
-
           <p>
-            Class:{" "}
+            Periods attended:{" "}
             <span className="font-medium text-foreground">
-              {student.class_name}
-            </span>
-          </p>
-
-          <p>
-            Section:{" "}
-            <span className="font-medium text-foreground">
-              {student.section_name}
+              {student.periods_attended} of {student.periods_marked} marked
             </span>
           </p>
         </div>
+        {student.marks.length > 0 && (
+          <ul className="mt-2 space-y-0.5 border-t pt-2 text-xs">
+            {student.marks.map((mark) => (
+              <li key={mark.period_number} className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">
+                  {periodNames.get(mark.period_number) ?? `Period ${mark.period_number}`}
+                </span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span className={cn("size-1.5 rounded-full", periodStatusDot[mark.status])} />
+                  {periodStatusLabels[mark.status]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

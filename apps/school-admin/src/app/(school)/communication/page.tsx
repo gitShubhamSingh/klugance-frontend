@@ -1,5 +1,5 @@
 import { CommunicationPage } from "@/features/communication";
 
 export default function Page() {
-  return <CommunicationPage />;
+  return <CommunicationPage app="school" />;
 }

@@ -1,4 +1,4 @@
-import { AttendancePage } from "@/features/attendance/components/attendance-page";
+import { AttendancePage } from "@/features/attendance";
 
 export default function Page() {
   return <AttendancePage />;

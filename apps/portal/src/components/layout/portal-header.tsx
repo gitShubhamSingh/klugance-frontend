@@ -1,63 +1,48 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { CalendarDays } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { sessionService } from "@/core/auth/session/session.service";
-import { portalConfig, type PortalRole } from "./roles/portal-config";
+import { useAuthStore } from "@/core/auth/store/auth.store";
+
+import { HeaderTitle } from "./header/header-title";
+import { NotificationsMenu } from "./header/notifications-menu";
+import { UserMenu } from "./header/user-menu";
+import type { PortalRole } from "./roles/portal-config";
 
 type Props = {
   role: PortalRole;
 };
 
 export function PortalHeader({ role }: Props) {
-  const config = portalConfig[role];
-  const router = useRouter();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const schoolName = useAuthStore((state) => state.user?.school?.name);
 
-  function handleLogout() {
-    if (loggingOut) return;
-
-    setLoggingOut(true);
-    sessionService.logout();
-    router.replace("/login");
-    router.refresh();
-  }
+  const today = new Intl.DateTimeFormat("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date());
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b bg-background/95 px-4 backdrop-blur sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-md supports-backdrop-filter:bg-background/70 sm:px-6">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <SidebarTrigger />
         <Separator orientation="vertical" className="h-5" />
-        <div>
-          <div className="text-sm font-medium">{config.label}</div>
-          <div className="text-xs text-muted-foreground">klugance</div>
-        </div>
+        <HeaderTitle role={role} schoolName={schoolName} />
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="size-4" />
-        </Button>
+      <div className="flex items-center gap-1 sm:gap-2">
+        <span className="hidden items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium text-muted-foreground lg:inline-flex">
+          <CalendarDays className="size-3.5" />
+          {today}
+        </span>
 
-        <div className="hidden text-right sm:block">
-          <div className="text-sm font-medium capitalize">{role}</div>
-          <div className="text-xs text-muted-foreground">{config.label}</div>
-        </div>
+        <NotificationsMenu role={role} />
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          disabled={loggingOut}
-        >
-          <LogOut className="mr-2 size-4" />
-          {loggingOut ? "Logging out..." : "Logout"}
-        </Button>
+        <Separator orientation="vertical" className="mx-1 hidden h-6 sm:block" />
+
+        <UserMenu role={role} />
       </div>
     </header>
   );

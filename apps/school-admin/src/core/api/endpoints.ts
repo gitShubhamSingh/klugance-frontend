@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
       PASSWORD_RESET_REQUEST: "/auth/password-reset/request",
       PASSWORD_RESET_CONFIRM: "/auth/password-reset/confirm",
       PASSWORD_CHANGE: "/auth/change-password",
+      PROFILE_PICTURE: "/auth/me/profile-picture",
     },
     DASHBOARD: {
       OVERVIEW: "/school/dashboard",
@@ -84,6 +85,26 @@ export const API_ENDPOINTS = {
 
         ENROLLMENTS: (studentId: string) =>
           `/school/students/${studentId}/enrollments`,
+
+        PARENTS: (studentId: string) =>
+          `/school/students/${studentId}/parents`,
+
+        PARENT_LINK: (studentId: string, linkId: string) =>
+          `/school/students/${studentId}/parents/${linkId}`,
+      },
+      PARENTS: {
+        LIST: "/school/parents",
+
+        CREATE: "/school/parents",
+
+        DETAIL: (id: string) =>
+          `/school/parents/${id}`,
+
+        UPDATE: (id: string) =>
+          `/school/parents/${id}`,
+
+        DELETE: (id: string) =>
+          `/school/parents/${id}`,
       },
       SUBJECTS: {
         LIST: "/school/subjects",
@@ -153,6 +174,32 @@ export const API_ENDPOINTS = {
         DELETE: (timetableId: string) =>
           `/school/timetables/${timetableId}`,
       },
+
+      /** Read-only view of homework set and reviewed in the portal. */
+      HOMEWORK: {
+        LIST: "/school/homework",
+        ACTIVITY: "/school/homework/activity",
+        DETAIL: (homeworkId: string) => `/school/homework/${homeworkId}`,
+      },
+
+      /** Read-only attendance marked by teachers in the portal. */
+      ATTENDANCE: {
+        OVERVIEW: "/school/attendance/overview",
+        SECTION: (sectionId: string) =>
+          `/school/attendance/sections/${sectionId}`,
+      },
+
+      /** School office chat; same shape as the portal's MESSAGES(role). */
+      MESSAGES: (app: "school") => ({
+        CONTACTS: `/${app}/messages/contacts`,
+        CONVERSATIONS: `/${app}/messages/conversations`,
+        CONVERSATION: (conversationId: string) =>
+          `/${app}/messages/conversations/${conversationId}`,
+        MESSAGES: (conversationId: string) =>
+          `/${app}/messages/conversations/${conversationId}/messages`,
+        READ: (conversationId: string) =>
+          `/${app}/messages/conversations/${conversationId}/read`,
+      }),
       
       
   } as const;

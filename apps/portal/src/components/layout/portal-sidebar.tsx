@@ -70,7 +70,7 @@ export function PortalSidebar({ role }: Props) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -83,6 +83,7 @@ export function PortalSidebar({ role }: Props) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+     */}
     </Sidebar>
   );
 }

@@ -1,7 +1,8 @@
 import {
     redirect,
   } from "next/navigation";
-  
+
   export default function HomePage() {
-    redirect("/login");
+    // /dashboard is protected: signed-out visitors are sent to /login by proxy.ts.
+    redirect("/dashboard");
   }

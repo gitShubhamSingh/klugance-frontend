@@ -50,4 +50,16 @@ export const authApi = {
 
     return data;
   },
+
+  async changePassword(payload: {
+    current_password: string;
+    new_password: string;
+  }): Promise<ApiMessage> {
+    const { data } = await apiClient.post<ApiMessage>(
+      API_ENDPOINTS.AUTH.PASSWORD_CHANGE,
+      payload,
+    );
+
+    return data;
+  },
 };

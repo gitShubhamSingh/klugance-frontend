@@ -25,6 +25,7 @@ import { StudentsHeader } from "./students-header";
 import { StudentsTable } from "./students-table";
 import { StudentProfileDialog } from "./student-profile-dialog";
 import { EditStudentDialog } from "./edit-student-dialog";
+import { StudentGuardiansDialog } from "./student-guardians-dialog";
 
 import { useStudents } from "../hooks/use-students";
 
@@ -82,6 +83,16 @@ export function StudentsPage() {
   const [
     editOpen,
     setEditOpen,
+  ] = useState(false);
+
+  const [
+    guardiansStudent,
+    setGuardiansStudent,
+  ] = useState<Student | null>(null);
+
+  const [
+    guardiansOpen,
+    setGuardiansOpen,
   ] = useState(false);
 
   // ================================================================
@@ -212,6 +223,27 @@ export function StudentsPage() {
 
     if (!open) {
       setEditStudent(null);
+    }
+  }
+
+  // ================================================================
+  // GUARDIANS
+  // ================================================================
+
+  function handleManageGuardians(
+    student: Student,
+  ) {
+    setGuardiansStudent(student);
+    setGuardiansOpen(true);
+  }
+
+  function handleGuardiansOpenChange(
+    open: boolean,
+  ) {
+    setGuardiansOpen(open);
+
+    if (!open) {
+      setGuardiansStudent(null);
     }
   }
 
@@ -389,6 +421,9 @@ export function StudentsPage() {
               onViewProfile={
                 handleViewProfile
               }
+              onManageGuardians={
+                handleManageGuardians
+              }
             />
 
           ) : filteredStudents.length === 0 ? (
@@ -433,6 +468,9 @@ export function StudentsPage() {
               onViewProfile={
                 handleViewProfile
               }
+              onManageGuardians={
+                handleManageGuardians
+              }
             />
 
           )}
@@ -450,6 +488,10 @@ export function StudentsPage() {
         onOpenChange={
           handleProfileOpenChange
         }
+        onEdit={(student) => {
+          handleProfileOpenChange(false);
+          handleEditStudent(student);
+        }}
       />
 
       {/* EDIT */}
@@ -459,6 +501,16 @@ export function StudentsPage() {
         open={editOpen}
         onOpenChange={
           handleEditOpenChange
+        }
+      />
+
+      {/* GUARDIANS */}
+
+      <StudentGuardiansDialog
+        student={guardiansStudent}
+        open={guardiansOpen}
+        onOpenChange={
+          handleGuardiansOpenChange
         }
       />
 
